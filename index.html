@@ -556,23 +556,20 @@
 
       <h2>Historial</h2>
 
-      <div class="card">
-        <h3>📋 Historial de mantenciones</h3>
-        <p>
-          Aquí aparecerán las órdenes de servicio realizadas,
-          junto con sus informes y evidencias fotográficas.
-        </p>
-      </div>
+     <div class="card">
+    <h3>📋 Historial de mantenciones</h3>
 
-      <div class="card">
-        <h3>Próximamente</h3>
-        <p>
-          Podrás buscar por cliente, generador, fecha o número
-          de orden.
-        </p>
-      </div>
+    <input
+        type="text"
+        id="historySearch"
+        placeholder="Buscar por cliente, generador o número de orden..."
+        style="margin-bottom:15px;"
+    >
 
-    </section>
+    <div id="historyList">
+        <p>No hay órdenes registradas.</p>
+    </div>
+</div>
 
   </main>
 
@@ -618,6 +615,7 @@
   document.getElementById("historyButton")
     .addEventListener("click", function() {
       showScreen(historyScreen);
+     renderHistory(); 
     });
 
   document.getElementById("backHome")
@@ -713,7 +711,66 @@ localStorage.setItem("aycOrdenActual", JSON.stringify(orderData));
       updateProgress();
 
     });
+function renderHistory() {
 
+    const historyList = document.getElementById("historyList");
+
+    if (!historyList) return;
+
+    const orders = JSON.parse(
+        localStorage.getItem("aycOrdenes") || "[]"
+    );
+
+    if (orders.length === 0) {
+        historyList.innerHTML =
+            "<p>No hay órdenes registradas.</p>";
+        return;
+    }
+
+    historyList.innerHTML = "";
+
+    orders.slice().reverse().forEach(function(order) {
+
+        const card = document.createElement("div");
+
+        card.className = "card";
+
+        const fecha = order.createdAt
+            ? new Date(order.createdAt).toLocaleString("es-CL")
+            : "Sin fecha";
+
+        card.innerHTML = `
+            <h3>📋 Orden de Servicio</h3>
+
+            <p>
+                <strong>Cliente:</strong>
+                ${order.clientName || order.cliente || "No informado"}
+            </p>
+
+            <p>
+                <strong>Motor:</strong>
+                ${order.motorBrand || order.marcaMotor || "No informado"}
+            </p>
+
+            <p>
+                <strong>Modelo:</strong>
+                ${order.motorModel || order.modeloMotor || "No informado"}
+            </p>
+
+            <p>
+                <strong>Ubicación:</strong>
+                ${order.servicePlace || order.lugarServicio || "No informado"}
+            </p>
+
+            <p>
+                <strong>Fecha:</strong>
+                ${fecha}
+            </p>
+        `;
+
+        historyList.appendChild(card);
+    });
+}
 </script>
 
 </body>
