@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f5b400">
+  <title>AYC Energía</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      background: #f4f5f7;
+      color: #1f2937;
+    }
+
+    .app {
+      max-width: 520px;
+      margin: 0 auto;
+      min-height: 100vh;
+      background: #ffffff;
+    }
+
+    .header {
+      background: #111827;
+      color: white;
+      padding: 22px 20px 20px;
+      border-bottom: 4px solid #f5b400;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo {
+      width: 48px;
+      height: 48px;
+      background: #f5b400;
+      color: #111827;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 27px;
+      font-weight: bold;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    .brand p {
+      margin: 3px 0 0;
+      font-size: 13px;
+      color: #d1d5db;
+    }
+
+    .content {
+      padding: 20px;
+    }
+
+    .welcome {
+      margin-bottom: 18px;
+    }
+
+    .welcome h2 {
+      margin: 0 0 6px;
+      font-size: 24px;
+    }
+
+    .welcome p {
+      margin: 0;
+      color: #6b7280;
+      font-size: 14px;
+    }
+
+    .main-button {
+      width: 100%;
+      border: 0;
+      background: #f5b400;
+      color: #111827;
+      padding: 17px;
+      border-radius: 14px;
+      font-size: 17px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-bottom: 12px;
+    }
+
+    .main-button:active {
+      transform: scale(0.98);
+    }
+
+    .secondary-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .secondary-button {
+      border: 1px solid #e5e7eb;
+      background: white;
+      border-radius: 14px;
+      padding: 18px 10px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .icon {
+      display: block;
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+
+    .card {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+
+    .card h3 {
+      margin: 0 0 5px;
+      font-size: 17px;
+    }
+
+    .card p {
+      margin: 0;
+      color: #6b7280;
+      font-size: 13px;
+    }
+
+    .screen {
+      display: none;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    .back {
+      border: 0;
+      background: transparent;
+      font-size: 15px;
+      padding: 4px 0 14px;
+      cursor: pointer;
+      color: #374151;
+    }
+
+    .progress-wrap {
+      margin: 8px 0 20px;
+    }
+
+    .progress-top {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      margin-bottom: 7px;
+    }
+
+    .progress {
+      height: 9px;
+      background: #e5e7eb;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: #f5b400;
+      transition: width 0.3s;
+    }
+
+    .section-title {
+      font-size: 18px;
+      margin: 20px 0 12px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: 13px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      background: white;
+      font-size: 16px;
+      margin-bottom: 13px;
+      outline: none;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: #f5b400;
+      box-shadow: 0 0 0 2px rgba(245, 180, 0, 0.15);
+    }
+
+    textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .save-button {
+      width: 100%;
+      border: 0;
+      background: #111827;
+      color: white;
+      padding: 16px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      margin-top: 8px;
+      cursor: pointer;
+    }
+
+    .message {
+      display: none;
+      background: #ecfdf5;
+      border: 1px solid #a7f3d0;
+      color: #065f46;
+      padding: 12px;
+      border-radius: 10px;
+      margin-top: 12px;
+      font-size: 14px;
+    }
+
+    .photo-box {
+      border: 2px dashed #d1d5db;
+      border-radius: 14px;
+      padding: 20px;
+      text-align: center;
+      background: #fff;
+      margin-top: 8px;
+    }
+
+    .photo-box strong {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .photo-box span {
+      color: #6b7280;
+      font-size: 13px;
+    }
+
+    .footer {
+      text-align: center;
+      color: #9ca3af;
+      font-size: 12px;
+      padding: 30px 20px;
+    }
+
+    @media (min-width: 600px) {
+      body {
+        padding: 20px;
+      }
+
+      .app {
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <header class="header">
+    <div class="brand">
+      <div class="logo">⚡</div>
+      <div>
+        <h1>AYC Energía</h1>
+        <p>Mantenimiento de Grupos Electrógenos</p>
+      </div>
+    </div>
+  </header>
+
+  <main class="content">
+
+    <!-- INICIO -->
+    <section id="homeScreen" class="screen active">
+
+      <div class="welcome">
+        <h2>Bienvenido</h2>
+        <p>Sistema de órdenes de servicio y mantenimiento.</p>
+      </div>
+
+      <button class="main-button" id="newOrderButton">
+        ＋ NUEVA ORDEN DE SERVICIO
+      </button>
+
+      <div class="secondary-grid">
+
+        <button class="secondary-button" id="equipmentButton">
+          <span class="icon">🏭</span>
+          Equipos
+        </button>
+
+        <button class="secondary-button" id="historyButton">
+          <span class="icon">📋</span>
+          Historial
+        </button>
+
+      </div>
+
+      <div class="card" style="margin-top:20px;">
+        <h3>📸 Evidencia fotográfica</h3>
+        <p>
+          Cada actividad de mantenimiento podrá quedar respaldada
+          mediante fotografías asociadas al procedimiento realizado.
+        </p>
+      </div>
+
+      <div class="card">
+        <h3>✍️ Firma del mandante</h3>
+        <p>
+          Al finalizar el servicio se incorporará la firma del
+          técnico y del cliente directamente en el teléfono.
+        </p>
+      </div>
+
+      <div class="card">
+        <h3>📄 Informe automático</h3>
+        <p>
+          La información ingresada durante la mantención será utilizada
+          posteriormente para generar el informe de servicio.
+        </p>
+      </div>
+
+    </section>
+
+
+    <!-- NUEVA ORDEN -->
+    <section id="orderScreen" class="screen">
+
+      <button class="back" id="backHome">
+        ← Volver al inicio
+      </button>
+
+      <h2>Nueva Orden de Servicio</h2>
+
+      <div class="progress-wrap">
+        <div class="progress-top">
+          <span>Avance de la orden</span>
+          <strong id="progressText">0%</strong>
+        </div>
+
+        <div class="progress">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
+      </div>
+
+
+      <h3 class="section-title">1. Datos del cliente</h3>
+
+      <label for="client">Razón Social / Cliente</label>
+      <input id="client" type="text" placeholder="Nombre del cliente">
+
+      <label for="contact">Contacto</label>
+      <input id="contact" type="text" placeholder="Nombre del contacto">
+
+      <div class="row">
+
+        <div>
+          <label for="phone">Teléfono</label>
+          <input id="phone" type="tel" placeholder="+56">
+        </div>
+
+        <div>
+          <label for="email">Correo electrónico</label>
+          <input id="email" type="email" placeholder="correo@ejemplo.cl">
+        </div>
+
+      </div>
+
+      <label for="address">Dirección</label>
+      <input id="address" type="text" placeholder="Dirección del servicio">
+
+      <div class="row">
+
+        <div>
+          <label for="city">Comuna / Ciudad</label>
+          <input id="city" type="text" placeholder="Talca">
+        </div>
+
+        <div>
+          <label for="order">Orden de compra / Ref.</label>
+          <input id="order" type="text" placeholder="OC / referencia">
+        </div>
+
+      </div>
+
+
+      <h3 class="section-title">2. Identificación del grupo electrógeno</h3>
+
+      <label for="engineBrand">Marca del motor</label>
+      <input id="engineBrand" type="text" placeholder="Ej.: Cummins">
+
+      <label for="engineModel">Modelo del motor</label>
+      <input id="engineModel" type="text" placeholder="Ej.: 4BT3.9G1">
+
+      <label for="engineSerial">N° de serie del motor</label>
+      <input id="engineSerial" type="text">
+
+      <label for="alternatorBrand">Marca del alternador</label>
+      <input id="alternatorBrand" type="text">
+
+      <label for="alternatorModel">Modelo del alternador</label>
+      <input id="alternatorModel" type="text">
+
+      <label for="alternatorSerial">N° de serie del alternador</label>
+      <input id="alternatorSerial" type="text">
+
+      <div class="row">
+
+        <div>
+          <label for="power">Potencia (kVA)</label>
+          <input id="power" type="number" placeholder="kVA">
+        </div>
+
+        <div>
+          <label for="voltage">Voltaje (V)</label>
+          <input id="voltage" type="number" placeholder="V">
+        </div>
+
+      </div>
+
+      <div class="row">
+
+        <div>
+          <label for="frequency">Frecuencia (Hz)</label>
+          <input id="frequency" type="number" placeholder="Hz">
+        </div>
+
+        <div>
+          <label for="fuel">Combustible</label>
+          <select id="fuel">
+            <option value="">Seleccionar</option>
+            <option>Diésel</option>
+            <option>Bencina</option>
+            <option>Gas</option>
+            <option>Otro</option>
+          </select>
+        </div>
+
+      </div>
+
+      <div class="row">
+
+        <div>
+          <label for="hourStart">Horómetro inicial (h)</label>
+          <input id="hourStart" type="number" step="0.1">
+        </div>
+
+        <div>
+          <label for="hourEnd">Horómetro final (h)</label>
+          <input id="hourEnd" type="number" step="0.1">
+        </div>
+
+      </div>
+
+      <label for="servicePlace">Lugar del servicio</label>
+      <input id="servicePlace" type="text">
+
+      <h3 class="section-title">Evidencia inicial</h3>
+
+      <div class="photo-box">
+        <strong>📷 Fotografías del equipo</strong>
+        <span>
+          En la siguiente versión incorporaremos la captura
+          y asociación automática de fotografías.
+        </span>
+      </div>
+
+      <h3 class="section-title">Observación inicial</h3>
+
+      <textarea
+        id="initialObservation"
+        placeholder="Ingrese cualquier observación inicial del equipo..."
+      ></textarea>
+
+      <button class="save-button" id="saveOrder">
+        GUARDAR Y CONTINUAR
+      </button>
+
+      <div class="message" id="savedMessage">
+        ✅ Orden guardada correctamente.
+      </div>
+
+    </section>
+
+
+    <!-- EQUIPOS -->
+    <section id="equipmentScreen" class="screen">
+
+      <button class="back" id="backEquipment">
+        ← Volver al inicio
+      </button>
+
+      <h2>Equipos</h2>
+
+      <div class="card">
+        <h3>🏭 Base de equipos</h3>
+        <p>
+          Aquí incorporaremos los generadores de cada cliente,
+          con marca, modelo, número de serie y antecedentes de
+          mantenimiento.
+        </p>
+      </div>
+
+      <div class="card">
+        <h3>Próximamente</h3>
+        <p>
+          Podrás seleccionar un equipo y la aplicación cargará
+          automáticamente sus datos.
+        </p>
+      </div>
+
+    </section>
+
+
+    <!-- HISTORIAL -->
+    <section id="historyScreen" class="screen">
+
+      <button class="back" id="backHistory">
+        ← Volver al inicio
+      </button>
+
+      <h2>Historial</h2>
+
+      <div class="card">
+        <h3>📋 Historial de mantenciones</h3>
+        <p>
+          Aquí aparecerán las órdenes de servicio realizadas,
+          junto con sus informes y evidencias fotográficas.
+        </p>
+      </div>
+
+      <div class="card">
+        <h3>Próximamente</h3>
+        <p>
+          Podrás buscar por cliente, generador, fecha o número
+          de orden.
+        </p>
+      </div>
+
+    </section>
+
+  </main>
+
+  <div class="footer">
+    AYC Energía SpA · Mantenimiento de Grupos Electrógenos
+  </div>
+
+</div>
+
+
+<script>
+
+  const homeScreen = document.getElementById("homeScreen");
+  const orderScreen = document.getElementById("orderScreen");
+  const equipmentScreen = document.getElementById("equipmentScreen");
+  const historyScreen = document.getElementById("historyScreen");
+
+  function showScreen(screen) {
+    homeScreen.classList.remove("active");
+    orderScreen.classList.remove("active");
+    equipmentScreen.classList.remove("active");
+    historyScreen.classList.remove("active");
+
+    screen.classList.add("active");
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+  }
+
+  document.getElementById("newOrderButton")
+    .addEventListener("click", function() {
+      showScreen(orderScreen);
+      updateProgress();
+    });
+
+  document.getElementById("equipmentButton")
+    .addEventListener("click", function() {
+      showScreen(equipmentScreen);
+    });
+
+  document.getElementById("historyButton")
+    .addEventListener("click", function() {
+      showScreen(historyScreen);
+    });
+
+  document.getElementById("backHome")
+    .addEventListener("click", function() {
+      showScreen(homeScreen);
+    });
+
+  document.getElementById("backEquipment")
+    .addEventListener("click", function() {
+      showScreen(homeScreen);
+    });
+
+  document.getElementById("backHistory")
+    .addEventListener("click", function() {
+      showScreen(homeScreen);
+    });
+
+
+  const fields = document.querySelectorAll(
+    "#orderScreen input, #orderScreen select, #orderScreen textarea"
+  );
+
+  function updateProgress() {
+
+    let completed = 0;
+
+    fields.forEach(function(field) {
+
+      if (field.value.trim() !== "") {
+        completed++;
+      }
+
+    });
+
+    const total = fields.length;
+
+    let percent = 0;
+
+    if (total > 0) {
+      percent = Math.round((completed / total) * 100);
+    }
+
+    document.getElementById("progressText").textContent =
+      percent + "%";
+
+    document.getElementById("progressBar").style.width =
+      percent + "%";
+  }
+
+
+  fields.forEach(function(field) {
+
+    field.addEventListener("input", updateProgress);
+    field.addEventListener("change", updateProgress);
+
+  });
+
+
+  document.getElementById("saveOrder")
+    .addEventListener("click", function() {
+
+      const orderData = {};
+
+      fields.forEach(function(field) {
+
+        if (field.id) {
+          orderData[field.id] = field.value;
+        }
+
+      });
+
+      orderData.createdAt = new Date().toISOString();
+
+      localStorage.setItem(
+        "aycOrdenActual",
+        JSON.stringify(orderData)
+      );
+
+      const message =
+        document.getElementById("savedMessage");
+
+      message.style.display = "block";
+
+      setTimeout(function() {
+        message.style.display = "none";
+      }, 3500);
+
+      updateProgress();
+
+    });
+
+</script>
+
+</body>
+</html>
