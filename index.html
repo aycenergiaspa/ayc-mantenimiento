@@ -691,10 +691,15 @@
 
       orderData.createdAt = new Date().toISOString();
 
-      localStorage.setItem(
-        "aycOrdenActual",
-        JSON.stringify(orderData)
-      );
+     const orders = JSON.parse(localStorage.getItem("aycOrdenes") || "[]");
+
+orderData.id = Date.now().toString();
+
+orders.push(orderData);
+
+localStorage.setItem("aycOrdenes", JSON.stringify(orders));
+
+localStorage.setItem("aycOrdenActual", JSON.stringify(orderData));
 
       const message =
         document.getElementById("savedMessage");
