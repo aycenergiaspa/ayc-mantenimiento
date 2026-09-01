@@ -1,1163 +1,553 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#f5b400">
-  <title>AYC Energía</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#f5b400">
+<title>AYC Energía - Órdenes de Mantenimiento</title>
 
-  <style>
-    * {
-      box-sizing: border-box;
-    }
+<!-- Librería PDF. Si el navegador tiene Internet, el informe se genera directamente como PDF. -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
-      background: #f4f5f7;
-      color: #1f2937;
-    }
-
-    .app {
-      max-width: 520px;
-      margin: 0 auto;
-      min-height: 100vh;
-      background: #ffffff;
-    }
-
-    .header {
-      background: #111827;
-      color: white;
-      padding: 22px 20px 20px;
-      border-bottom: 4px solid #f5b400;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .logo {
-      width: 48px;
-      height: 48px;
-      background: #f5b400;
-      color: #111827;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 27px;
-      font-weight: bold;
-    }
-
-    .brand h1 {
-      margin: 0;
-      font-size: 22px;
-    }
-
-    .brand p {
-      margin: 3px 0 0;
-      font-size: 13px;
-      color: #d1d5db;
-    }
-
-    .content {
-      padding: 20px;
-    }
-
-    .welcome {
-      margin-bottom: 18px;
-    }
-
-    .welcome h2 {
-      margin: 0 0 6px;
-      font-size: 24px;
-    }
-
-    .welcome p {
-      margin: 0;
-      color: #6b7280;
-      font-size: 14px;
-    }
-
-    .main-button {
-      width: 100%;
-      border: 0;
-      background: #f5b400;
-      color: #111827;
-      padding: 17px;
-      border-radius: 14px;
-      font-size: 17px;
-      font-weight: 700;
-      cursor: pointer;
-      margin-bottom: 12px;
-    }
-
-    .main-button:active {
-      transform: scale(0.98);
-    }
-
-    .secondary-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-top: 8px;
-    }
-
-    .secondary-button {
-      border: 1px solid #e5e7eb;
-      background: white;
-      border-radius: 14px;
-      padding: 18px 10px;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    .icon {
-      display: block;
-      font-size: 28px;
-      margin-bottom: 8px;
-    }
-
-    .card {
-      background: #f9fafb;
-      border: 1px solid #e5e7eb;
-      border-radius: 16px;
-      padding: 16px;
-      margin-bottom: 14px;
-    }
-
-    .card h3 {
-      margin: 0 0 5px;
-      font-size: 17px;
-    }
-
-    .card p {
-      margin: 0;
-      color: #6b7280;
-      font-size: 13px;
-    }
-
-    .screen {
-      display: none;
-    }
-
-    .screen.active {
-      display: block;
-    }
-
-    .back {
-      border: 0;
-      background: transparent;
-      font-size: 15px;
-      padding: 4px 0 14px;
-      cursor: pointer;
-      color: #374151;
-    }
-
-    .progress-wrap {
-      margin: 8px 0 20px;
-    }
-
-    .progress-top {
-      display: flex;
-      justify-content: space-between;
-      font-size: 13px;
-      margin-bottom: 7px;
-    }
-
-    .progress {
-      height: 9px;
-      background: #e5e7eb;
-      border-radius: 10px;
-      overflow: hidden;
-    }
-
-    .progress-bar {
-      height: 100%;
-      width: 0%;
-      background: #f5b400;
-      transition: width 0.3s;
-    }
-
-    .section-title {
-      font-size: 18px;
-      margin: 20px 0 12px;
-    }
-
-    label {
-      display: block;
-      font-size: 13px;
-      font-weight: 600;
-      margin-bottom: 6px;
-    }
-
-    input,
-    select,
-    textarea {
-      width: 100%;
-      padding: 13px;
-      border: 1px solid #d1d5db;
-      border-radius: 10px;
-      background: white;
-      font-size: 16px;
-      margin-bottom: 13px;
-      outline: none;
-    }
-
-    input:focus,
-    select:focus,
-    textarea:focus {
-      border-color: #f5b400;
-      box-shadow: 0 0 0 2px rgba(245, 180, 0, 0.15);
-    }
-
-    textarea {
-      min-height: 90px;
-      resize: vertical;
-    }
-
-    .row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-
-    .save-button {
-      width: 100%;
-      border: 0;
-      background: #111827;
-      color: white;
-      padding: 16px;
-      border-radius: 12px;
-      font-size: 16px;
-      font-weight: 700;
-      margin-top: 8px;
-      cursor: pointer;
-    }
-
-    .message {
-      display: none;
-      background: #ecfdf5;
-      border: 1px solid #a7f3d0;
-      color: #065f46;
-      padding: 12px;
-      border-radius: 10px;
-      margin-top: 12px;
-      font-size: 14px;
-    }
-
-    .photo-box {
-      border: 2px dashed #d1d5db;
-      border-radius: 14px;
-      padding: 20px;
-      text-align: center;
-      background: #fff;
-      margin-top: 8px;
-    }
-
-    .photo-box strong {
-      display: block;
-      margin-bottom: 5px;
-    }
-
-    .photo-box span {
-      color: #6b7280;
-      font-size: 13px;
-    }
-
-
-    .photo-preview-item {
-      position: relative;
-      background: #f9fafb;
-      border: 1px solid #e5e7eb;
-      border-radius: 12px;
-      padding: 6px;
-    }
-
-    .photo-preview-item img {
-      display: block;
-      width: 100%;
-      height: 140px;
-      object-fit: cover;
-      border-radius: 8px;
-    }
-
-    .photo-remove {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      width: 30px;
-      height: 30px;
-      border: 0;
-      border-radius: 50%;
-      background: #dc2626;
-      color: white;
-      font-size: 20px;
-      line-height: 30px;
-      cursor: pointer;
-    }
-
-    .history-card-actions {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin-top: 12px;
-    }
-
-    .small-action {
-      border: 1px solid #d1d5db;
-      background: white;
-      color: #111827;
-      border-radius: 10px;
-      padding: 11px 8px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .small-action.primary {
-      background: #111827;
-      color: white;
-      border-color: #111827;
-    }
-
-    .report-preview {
-      display: none;
-    }
-
-    @media print {
-      body {
-        background: white;
-        padding: 0 !important;
-      }
-
-      .app {
-        max-width: none;
-        box-shadow: none;
-        border-radius: 0;
-      }
-
-      .header,
-      .footer,
-      .screen:not(#reportScreen) {
-        display: none !important;
-      }
-
-      #reportScreen {
-        display: block !important;
-      }
-    }
-
-    .footer {
-      text-align: center;
-      color: #9ca3af;
-      font-size: 12px;
-      padding: 30px 20px;
-    }
-
-    @media (min-width: 600px) {
-      body {
-        padding: 20px;
-      }
-
-      .app {
-        border-radius: 20px;
-        overflow: hidden;
-        box-shadow: 0 8px 30px rgba(0,0,0,0.08);
-      }
-    }
-  </style>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:#f4f5f7;color:#1f2937}
+.app{max-width:760px;margin:0 auto;min-height:100vh;background:#fff}
+.header{background:#111827;color:#fff;padding:20px;border-bottom:4px solid #f5b400}
+.brand{display:flex;align-items:center;gap:12px}.logo{width:48px;height:48px;background:#f5b400;color:#111827;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:27px;font-weight:bold}
+.brand h1{margin:0;font-size:22px}.brand p{margin:3px 0 0;font-size:13px;color:#d1d5db}
+.content{padding:20px}.screen{display:none}.screen.active{display:block}
+.welcome{margin-bottom:18px}.welcome h2{margin:0 0 6px;font-size:24px}.welcome p{margin:0;color:#6b7280;font-size:14px}
+.main-button,.save-button{width:100%;border:0;border-radius:12px;padding:16px;font-size:16px;font-weight:700;cursor:pointer}
+.main-button{background:#f5b400;color:#111827;margin-bottom:12px}.save-button{background:#111827;color:#fff;margin-top:10px}
+.secondary-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px}
+.secondary-button,.small-action{border:1px solid #e5e7eb;background:#fff;border-radius:12px;padding:16px;font-size:15px;font-weight:600;cursor:pointer}
+.icon{display:block;font-size:28px;margin-bottom:8px}
+.card{background:#f9fafb;border:1px solid #e5e7eb;border-radius:16px;padding:16px;margin-bottom:14px}
+.card h3{margin:0 0 8px;font-size:17px}.card p{margin:5px 0;color:#4b5563;font-size:13px}
+.back{border:0;background:transparent;font-size:15px;padding:4px 0 14px;cursor:pointer;color:#374151}
+.progress-wrap{margin:8px 0 20px}.progress-top{display:flex;justify-content:space-between;font-size:13px;margin-bottom:7px}
+.progress{height:9px;background:#e5e7eb;border-radius:10px;overflow:hidden}.progress-bar{height:100%;width:0%;background:#f5b400;transition:width .3s}
+.section-title{font-size:18px;margin:22px 0 12px;border-bottom:1px solid #e5e7eb;padding-bottom:7px}
+label{display:block;font-size:13px;font-weight:600;margin-bottom:6px}
+input,select,textarea{width:100%;padding:12px;border:1px solid #d1d5db;border-radius:10px;background:#fff;font-size:16px;margin-bottom:12px;outline:none}
+textarea{min-height:90px;resize:vertical}
+input:focus,select:focus,textarea:focus{border-color:#f5b400;box-shadow:0 0 0 2px rgba(245,180,0,.15)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.message{display:none;background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46;padding:12px;border-radius:10px;margin-top:12px;font-size:14px}
+.photo-box{border:2px dashed #d1d5db;border-radius:14px;padding:18px;text-align:center;background:#fff}
+.photo-box strong{display:block;margin-bottom:5px}.photo-box span{color:#6b7280;font-size:13px}
+.photo-preview{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:15px}
+.photo-item{position:relative;border:1px solid #e5e7eb;border-radius:12px;padding:6px;background:#f9fafb}
+.photo-item img{display:block;width:100%;height:150px;object-fit:cover;border-radius:8px}
+.photo-remove{position:absolute;top:10px;right:10px;width:30px;height:30px;border:0;border-radius:50%;background:#dc2626;color:#fff;font-size:20px;cursor:pointer}
+.signature-box{border:1px solid #d1d5db;border-radius:12px;background:#fff;padding:8px}
+.signature-canvas{display:block;width:100%;height:180px;background:#fff;border:1px dashed #9ca3af;border-radius:8px;touch-action:none}
+.signature-actions{display:flex;gap:8px;margin-top:8px}.signature-actions button{flex:1}
+.check-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.check-item{display:flex;align-items:center;gap:8px;border:1px solid #e5e7eb;border-radius:10px;padding:10px;background:#fff;font-size:13px}
+.check-item input{width:auto;margin:0}
+.parts-head,.part-row{display:grid;grid-template-columns:2fr .7fr .8fr 1.5fr;gap:8px;align-items:center}
+.parts-head{font-size:12px;font-weight:700;color:#6b7280;margin-bottom:6px}.part-row{margin-bottom:8px}.part-row input{margin:0;font-size:14px;padding:10px}.remove-part{border:0;background:#fee2e2;color:#991b1b;border-radius:8px;padding:10px;cursor:pointer}
+.history-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.small-action.primary{background:#111827;color:#fff;border-color:#111827}
+.report-header{border-bottom:3px solid #f5b400;padding-bottom:12px;text-align:center}.report-header h1{margin:0}.report-table{width:100%;border-collapse:collapse;font-size:12px}.report-table td{border:1px solid #d1d5db;padding:7px;vertical-align:top}.report-table td:first-child{font-weight:700;width:34%}
+.report-photos{display:grid;grid-template-columns:1fr 1fr;gap:10px}.report-photos img{width:100%;height:180px;object-fit:cover;border-radius:8px;border:1px solid #d1d5db}
+.report-signatures{display:grid;grid-template-columns:1fr 1fr;gap:15px}.report-signatures img{width:100%;height:130px;object-fit:contain;border:1px solid #d1d5db;border-radius:8px}
+.footer{text-align:center;color:#9ca3af;font-size:12px;padding:30px 20px}
+@media(max-width:600px){.row,.check-grid,.parts-head,.part-row{grid-template-columns:1fr}.photo-preview,.report-photos,.report-signatures{grid-template-columns:1fr}}
+@media print{
+ body{background:#fff;padding:0!important}.app{max-width:none;box-shadow:none}
+ .header,.footer,.screen:not(#reportScreen){display:none!important}
+ #reportScreen{display:block!important}
+ #reportActions{display:none!important}
+}
+</style>
 </head>
 
 <body>
-
 <div class="app">
-
-  <header class="header">
-    <div class="brand">
-      <div class="logo">⚡</div>
-      <div>
-        <h1>AYC Energía</h1>
-        <p>Mantenimiento de Grupos Electrógenos</p>
-      </div>
-    </div>
-  </header>
-
-  <main class="content">
-
-    <!-- INICIO -->
-    <section id="homeScreen" class="screen active">
-
-      <div class="welcome">
-        <h2>Bienvenido</h2>
-        <p>Sistema de órdenes de servicio y mantenimiento.</p>
-      </div>
-
-      <button class="main-button" id="newOrderButton">
-        ＋ NUEVA ORDEN DE SERVICIO
-      </button>
-
-      <div class="secondary-grid">
-
-        <button class="secondary-button" id="equipmentButton">
-          <span class="icon">🏭</span>
-          Equipos
-        </button>
-
-        <button class="secondary-button" id="historyButton">
-          <span class="icon">📋</span>
-          Historial
-        </button>
-
-      </div>
-
-      <div class="card" style="margin-top:20px;">
-        <h3>📸 Evidencia fotográfica</h3>
-        <p>
-          Cada actividad de mantenimiento podrá quedar respaldada
-          mediante fotografías asociadas al procedimiento realizado.
-        </p>
-      </div>
-
-      <div class="card">
-        <h3>✍️ Firma del mandante</h3>
-        <p>
-          Al finalizar el servicio se incorporará la firma del
-          técnico y del cliente directamente en el teléfono.
-        </p>
-      </div>
-
-      <div class="card">
-        <h3>📄 Informe automático</h3>
-        <p>
-          La información ingresada durante la mantención será utilizada
-          posteriormente para generar el informe de servicio.
-        </p>
-      </div>
-
-    </section>
-
-
-    <!-- NUEVA ORDEN -->
-    <section id="orderScreen" class="screen">
-
-      <button class="back" id="backHome">
-        ← Volver al inicio
-      </button>
-
-      <h2>Nueva Orden de Servicio</h2>
-
-      <div class="progress-wrap">
-        <div class="progress-top">
-          <span>Avance de la orden</span>
-          <strong id="progressText">0%</strong>
-        </div>
-
-        <div class="progress">
-          <div class="progress-bar" id="progressBar"></div>
-        </div>
-      </div>
-
-
-      <h3 class="section-title">1. Datos del cliente</h3>
-
-      <label for="client">Razón Social / Cliente</label>
-      <input id="client" type="text" placeholder="Nombre del cliente">
-
-      <label for="contact">Contacto</label>
-      <input id="contact" type="text" placeholder="Nombre del contacto">
-
-      <div class="row">
-
-        <div>
-          <label for="phone">Teléfono</label>
-          <input id="phone" type="tel" placeholder="+56">
-        </div>
-
-        <div>
-          <label for="email">Correo electrónico</label>
-          <input id="email" type="email" placeholder="correo@ejemplo.cl">
-        </div>
-
-      </div>
-
-      <label for="address">Dirección</label>
-      <input id="address" type="text" placeholder="Dirección del servicio">
-
-      <div class="row">
-
-        <div>
-          <label for="city">Comuna / Ciudad</label>
-          <input id="city" type="text" placeholder="Talca">
-        </div>
-
-        <div>
-          <label for="order">Orden de compra / Ref.</label>
-          <input id="order" type="text" placeholder="OC / referencia">
-        </div>
-
-      </div>
-
-
-      <h3 class="section-title">2. Identificación del grupo electrógeno</h3>
-
-      <label for="engineBrand">Marca del motor</label>
-      <input id="engineBrand" type="text" placeholder="Ej.: Cummins">
-
-      <label for="engineModel">Modelo del motor</label>
-      <input id="engineModel" type="text" placeholder="Ej.: 4BT3.9G1">
-
-      <label for="engineSerial">N° de serie del motor</label>
-      <input id="engineSerial" type="text">
-
-      <label for="alternatorBrand">Marca del alternador</label>
-      <input id="alternatorBrand" type="text">
-
-      <label for="alternatorModel">Modelo del alternador</label>
-      <input id="alternatorModel" type="text">
-
-      <label for="alternatorSerial">N° de serie del alternador</label>
-      <input id="alternatorSerial" type="text">
-
-      <div class="row">
-
-        <div>
-          <label for="power">Potencia (kVA)</label>
-          <input id="power" type="number" placeholder="kVA">
-        </div>
-
-        <div>
-          <label for="voltage">Voltaje (V)</label>
-          <input id="voltage" type="number" placeholder="V">
-        </div>
-
-      </div>
-
-      <div class="row">
-
-        <div>
-          <label for="frequency">Frecuencia (Hz)</label>
-          <input id="frequency" type="number" placeholder="Hz">
-        </div>
-
-        <div>
-          <label for="fuel">Combustible</label>
-          <select id="fuel">
-            <option value="">Seleccionar</option>
-            <option>Diésel</option>
-            <option>Bencina</option>
-            <option>Gas</option>
-            <option>Otro</option>
-          </select>
-        </div>
-
-      </div>
-
-      <div class="row">
-
-        <div>
-          <label for="hourStart">Horómetro inicial (h)</label>
-          <input id="hourStart" type="number" step="0.1">
-        </div>
-
-        <div>
-          <label for="hourEnd">Horómetro final (h)</label>
-          <input id="hourEnd" type="number" step="0.1">
-        </div>
-
-      </div>
-
-      <label for="servicePlace">Lugar del servicio</label>
-      <input id="servicePlace" type="text">
-
-      <h3 class="section-title">Evidencia inicial</h3>
-
-      <div class="photo-box">
-        <strong>📷 Fotografías del equipo</strong>
-        <span>
-          Agregue fotografías del estado del equipo, trabajos realizados
-          o cualquier evidencia del mantenimiento.
-        </span>
-
-        <input
-          type="file"
-          id="equipmentPhotos"
-          accept="image/*"
-          multiple
-          style="margin-top:15px;"
-        >
-
-        <div id="photoCount" style="margin-top:10px;font-size:13px;color:#6b7280;">
-          No hay fotografías seleccionadas.
-        </div>
-
-        <div
-          id="photoPreview"
-          style="
-            display:grid;
-            grid-template-columns:repeat(2, minmax(0,1fr));
-            gap:12px;
-            margin-top:15px;
-          "
-        ></div>
-      </div>
-
-      <h3 class="section-title">Observación inicial</h3>
-
-      <textarea
-        id="initialObservation"
-        placeholder="Ingrese cualquier observación inicial del equipo..."
-      ></textarea>
-
-      <button class="save-button" id="saveOrder">
-        GUARDAR Y CONTINUAR
-      </button>
-
-      <div class="message" id="savedMessage">
-        ✅ Orden guardada correctamente.
-      </div>
-
-    </section>
-
-
-    <!-- EQUIPOS -->
-    <section id="equipmentScreen" class="screen">
-
-      <button class="back" id="backEquipment">
-        ← Volver al inicio
-      </button>
-
-      <h2>Equipos</h2>
-
-      <div class="card">
-        <h3>🏭 Base de equipos</h3>
-        <p>
-          Aquí incorporaremos los generadores de cada cliente,
-          con marca, modelo, número de serie y antecedentes de
-          mantenimiento.
-        </p>
-      </div>
-
-      <div class="card">
-        <h3>Próximamente</h3>
-        <p>
-          Podrás seleccionar un equipo y la aplicación cargará
-          automáticamente sus datos.
-        </p>
-      </div>
-
-    </section>
-
-
-    <!-- HISTORIAL -->
-    <section id="historyScreen" class="screen">
-
-      <button class="back" id="backHistory">
-        ← Volver al inicio
-      </button>
-
-      <h2>Historial</h2>
-
-     <div class="card">
-    <h3>📋 Historial de mantenciones</h3>
-
-    <input
-        type="text"
-        id="historySearch"
-        placeholder="Buscar por cliente, generador o número de orden..."
-        style="margin-bottom:15px;"
-    >
-
-    <div id="historyList">
-        <p>No hay órdenes registradas.</p>
-    </div>
-</div>
-
-
-    <!-- INFORME -->
-    <section id="reportScreen" class="screen">
-      <button class="back" id="backReport">← Volver</button>
-
-      <div id="reportContent" class="card"></div>
-
-      <button class="save-button" id="downloadReportButton">
-        📄 DESCARGAR INFORME PDF
-      </button>
-
-      <button class="small-action" id="printReportButton" style="width:100%;margin-top:10px;">
-        🖨️ IMPRIMIR / GUARDAR COMO PDF
-      </button>
-    </section>
-
-  </main>
-
-  <div class="footer">
-    AYC Energía SpA · Mantenimiento de Grupos Electrógenos
+<header class="header">
+  <div class="brand">
+    <div class="logo">⚡</div>
+    <div><h1>AYC Energía</h1><p>Mantenimiento de Grupos Electrógenos</p></div>
   </div>
+</header>
 
+<main class="content">
+
+<section id="homeScreen" class="screen active">
+  <div class="welcome"><h2>Bienvenido</h2><p>Sistema de órdenes de servicio y mantenimiento.</p></div>
+  <button class="main-button" id="newOrderButton">＋ NUEVA ORDEN DE SERVICIO</button>
+  <div class="secondary-grid">
+    <button class="secondary-button" id="equipmentButton"><span class="icon">🏭</span>Equipos</button>
+    <button class="secondary-button" id="historyButton"><span class="icon">📋</span>Historial</button>
+  </div>
+  <div class="card" style="margin-top:20px"><h3>📸 Evidencia fotográfica</h3><p>Registra fotografías del estado inicial, trabajos realizados y estado final.</p></div>
+  <div class="card"><h3>✍️ Firma del mandante</h3><p>La orden puede incluir firma del técnico y del cliente directamente desde el dispositivo.</p></div>
+  <div class="card"><h3>📄 Informe automático</h3><p>La orden completa puede convertirse en un informe PDF para entregar al cliente.</p></div>
+</section>
+
+<section id="orderScreen" class="screen">
+<button class="back" id="backHome">← Volver al inicio</button>
+<h2>Nueva Orden de Servicio</h2>
+
+<div class="progress-wrap"><div class="progress-top"><span>Avance de la orden</span><strong id="progressText">0%</strong></div><div class="progress"><div class="progress-bar" id="progressBar"></div></div></div>
+
+<h3 class="section-title">1. Datos del cliente</h3>
+<label for="client">Razón Social / Cliente</label><input id="client" type="text" placeholder="Nombre del cliente">
+<label for="contact">Contacto</label><input id="contact" type="text" placeholder="Nombre del contacto">
+<div class="row"><div><label for="phone">Teléfono</label><input id="phone" type="tel" placeholder="+56"></div><div><label for="email">Correo electrónico</label><input id="email" type="email" placeholder="correo@ejemplo.cl"></div></div>
+<label for="address">Dirección</label><input id="address" type="text" placeholder="Dirección del servicio">
+<div class="row"><div><label for="city">Comuna / Ciudad</label><input id="city" type="text" placeholder="Talca"></div><div><label for="order">Orden de compra / Ref.</label><input id="order" type="text" placeholder="OC / referencia"></div></div>
+
+<h3 class="section-title">2. Identificación del grupo electrógeno</h3>
+<label for="engineBrand">Marca del motor</label><input id="engineBrand" type="text" placeholder="Ej.: Cummins">
+<label for="engineModel">Modelo del motor</label><input id="engineModel" type="text" placeholder="Ej.: 4BT3.9G1">
+<label for="engineSerial">N° de serie del motor</label><input id="engineSerial" type="text">
+<label for="alternatorBrand">Marca del alternador</label><input id="alternatorBrand" type="text">
+<label for="alternatorModel">Modelo del alternador</label><input id="alternatorModel" type="text">
+<label for="alternatorSerial">N° de serie del alternador</label><input id="alternatorSerial" type="text">
+<div class="row"><div><label for="power">Potencia (kVA)</label><input id="power" type="number" placeholder="kVA"></div><div><label for="voltage">Voltaje (V)</label><input id="voltage" type="number" placeholder="V"></div></div>
+<div class="row"><div><label for="frequency">Frecuencia (Hz)</label><input id="frequency" type="number" placeholder="Hz"></div><div><label for="fuel">Combustible</label><select id="fuel"><option value="">Seleccionar</option><option>Diésel</option><option>Bencina</option><option>Gas</option><option>Otro</option></select></div></div>
+<div class="row"><div><label for="hourStart">Horómetro inicial (h)</label><input id="hourStart" type="number" step="0.1"></div><div><label for="hourEnd">Horómetro final (h)</label><input id="hourEnd" type="number" step="0.1"></div></div>
+<label for="servicePlace">Lugar del servicio</label><input id="servicePlace" type="text">
+
+<h3 class="section-title">3. Evidencia inicial y final</h3>
+<div class="photo-box">
+<strong>📷 Fotografías del equipo</strong><span>Puede seleccionar varias fotografías. Se comprimen para permitir guardarlas junto a la orden.</span>
+<input type="file" id="equipmentPhotos" accept="image/*" multiple style="margin-top:15px">
+<div id="photoCount" style="margin-top:10px;font-size:13px;color:#6b7280">No hay fotografías seleccionadas.</div>
+<div id="photoPreview" class="photo-preview"></div>
 </div>
 
+<h3 class="section-title">4. Observaciones</h3>
+<label for="initialObservation">Observación inicial</label><textarea id="initialObservation" placeholder="Estado encontrado al iniciar el servicio..."></textarea>
+<label for="workPerformed">Trabajo realizado</label><textarea id="workPerformed" placeholder="Describa detalladamente los trabajos realizados..."></textarea>
+<label for="finalObservation">Observación final / estado del equipo</label><textarea id="finalObservation" placeholder="Indique el estado final, pruebas y recomendaciones..."></textarea>
+
+<h3 class="section-title">5. Checklist de mantenimiento</h3>
+<div class="check-grid">
+<label class="check-item"><input type="checkbox" data-check="Cambio de aceite"> Cambio de aceite</label>
+<label class="check-item"><input type="checkbox" data-check="Filtro de aceite"> Filtro de aceite</label>
+<label class="check-item"><input type="checkbox" data-check="Filtro de combustible"> Filtro de combustible</label>
+<label class="check-item"><input type="checkbox" data-check="Filtro de aire"> Filtro de aire</label>
+<label class="check-item"><input type="checkbox" data-check="Sistema de refrigeración"> Sistema de refrigeración</label>
+<label class="check-item"><input type="checkbox" data-check="Correas"> Correas</label>
+<label class="check-item"><input type="checkbox" data-check="Mangueras"> Mangueras</label>
+<label class="check-item"><input type="checkbox" data-check="Batería"> Batería</label>
+<label class="check-item"><input type="checkbox" data-check="Bornes y conexiones"> Bornes y conexiones</label>
+<label class="check-item"><input type="checkbox" data-check="Sistema de combustible"> Sistema de combustible</label>
+<label class="check-item"><input type="checkbox" data-check="Tablero / controlador"> Tablero / controlador</label>
+<label class="check-item"><input type="checkbox" data-check="Alternador"> Alternador</label>
+<label class="check-item"><input type="checkbox" data-check="Sistema de escape"> Sistema de escape</label>
+<label class="check-item"><input type="checkbox" data-check="Prueba en vacío"> Prueba en vacío</label>
+<label class="check-item"><input type="checkbox" data-check="Prueba con carga"> Prueba con carga</label>
+<label class="check-item"><input type="checkbox" data-check="Limpieza general"> Limpieza general</label>
+</div>
+
+<h3 class="section-title">6. Repuestos y materiales</h3>
+<div class="parts-head"><span>Descripción</span><span>Cant.</span><span>Unidad</span><span>Observación</span></div>
+<div id="partsContainer"></div>
+<button type="button" class="small-action" id="addPartButton">＋ Agregar repuesto/material</button>
+
+<h3 class="section-title">7. Firma y conformidad</h3>
+<div class="row">
+<div>
+<label>Firma del técnico</label>
+<div class="signature-box"><canvas id="technicianSignature" class="signature-canvas"></canvas><div class="signature-actions"><button type="button" class="small-action" id="clearTech">Limpiar</button></div></div>
+</div>
+<div>
+<label>Firma del cliente / mandante</label>
+<div class="signature-box"><canvas id="clientSignature" class="signature-canvas"></canvas><div class="signature-actions"><button type="button" class="small-action" id="clearClient">Limpiar</button></div></div>
+</div>
+</div>
+
+<button class="save-button" id="saveOrder">💾 GUARDAR ORDEN</button>
+<div class="message" id="savedMessage">✅ Orden guardada correctamente.</div>
+</section>
+
+<section id="equipmentScreen" class="screen">
+<button class="back" id="backEquipment">← Volver al inicio</button>
+<h2>Equipos</h2>
+<div class="card"><h3>🏭 Base de equipos</h3><p>Las órdenes guardadas contienen los antecedentes del grupo electrógeno y permiten identificar cliente, motor y alternador.</p></div>
+<div id="equipmentList"></div>
+</section>
+
+<section id="historyScreen" class="screen">
+<button class="back" id="backHistory">← Volver al inicio</button>
+<h2>Historial</h2>
+<div class="card">
+<h3>📋 Historial de mantenciones</h3>
+<input id="historySearch" type="text" placeholder="Buscar por cliente, generador o número de orden...">
+<div id="historyList"><p>No hay órdenes registradas.</p></div>
+</div>
+</section>
+
+<section id="reportScreen" class="screen">
+<button class="back" id="backReport">← Volver al historial</button>
+<div id="reportContent"></div>
+<div id="reportActions">
+<button class="save-button" id="downloadReportButton">📄 DESCARGAR INFORME PDF</button>
+<button class="small-action" id="printReportButton" style="width:100%;margin-top:10px">🖨️ Imprimir / Guardar como PDF</button>
+</div>
+</section>
+
+</main>
+<div class="footer">AYC Energía SpA · Mantenimiento de Grupos Electrógenos</div>
+</div>
 
 <script>
+const $ = id => document.getElementById(id);
+const screens = {
+  home: $("homeScreen"), order: $("orderScreen"), equipment: $("equipmentScreen"),
+  history: $("historyScreen"), report: $("reportScreen")
+};
+const fields = document.querySelectorAll("#orderScreen input:not([type=file]):not([type=checkbox]), #orderScreen select, #orderScreen textarea");
 
-  const homeScreen = document.getElementById("homeScreen");
-  const orderScreen = document.getElementById("orderScreen");
-  const equipmentScreen = document.getElementById("equipmentScreen");
-  const historyScreen = document.getElementById("historyScreen");
-  const reportScreen = document.getElementById("reportScreen");
+function showScreen(screen){
+  Object.values(screens).forEach(s=>s.classList.remove("active"));
+  screen.classList.add("active");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
 
-  function showScreen(screen) {
-    homeScreen.classList.remove("active");
-    orderScreen.classList.remove("active");
-    equipmentScreen.classList.remove("active");
-    historyScreen.classList.remove("active");
-    reportScreen.classList.remove("active");
+$("newOrderButton").addEventListener("click",()=>{
+  resetOrderForm();
+  showScreen(screens.order);
+  updateProgress();
+});
+$("equipmentButton").addEventListener("click",()=>{renderEquipment();showScreen(screens.equipment)});
+$("historyButton").addEventListener("click",()=>{renderHistory();showScreen(screens.history)});
+$("backHome").addEventListener("click",()=>showScreen(screens.home));
+$("backEquipment").addEventListener("click",()=>showScreen(screens.home));
+$("backHistory").addEventListener("click",()=>showScreen(screens.home));
+$("backReport").addEventListener("click",()=>{renderHistory();showScreen(screens.history)});
 
-    screen.classList.add("active");
+function updateProgress(){
+  let completed=0;
+  fields.forEach(f=>{if(String(f.value||"").trim()!=="")completed++});
+  document.querySelectorAll("#orderScreen input[type=checkbox]:checked").forEach(()=>completed+=.2);
+  const total=fields.length+3;
+  const percent=Math.min(100,Math.round(completed/total*100));
+  $("progressText").textContent=percent+"%";
+  $("progressBar").style.width=percent+"%";
+}
+fields.forEach(f=>{f.addEventListener("input",updateProgress);f.addEventListener("change",updateProgress)});
 
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth"
-    });
-  }
-
-  document.getElementById("newOrderButton")
-    .addEventListener("click", function() {
-      showScreen(orderScreen);
-      updateProgress();
-    });
-
-  document.getElementById("equipmentButton")
-    .addEventListener("click", function() {
-      showScreen(equipmentScreen);
-    });
-
-  document.getElementById("historyButton")
-    .addEventListener("click", function() {
-      showScreen(historyScreen);
-     renderHistory(); 
-    });
-
-  document.getElementById("backHome")
-    .addEventListener("click", function() {
-      showScreen(homeScreen);
-    });
-
-  document.getElementById("backEquipment")
-    .addEventListener("click", function() {
-      showScreen(homeScreen);
-    });
-
-  document.getElementById("backHistory")
-    .addEventListener("click", function() {
-      showScreen(homeScreen);
-    });
-
-
-  const fields = document.querySelectorAll(
-    "#orderScreen input, #orderScreen select, #orderScreen textarea"
-  );
-
-  function updateProgress() {
-
-    let completed = 0;
-
-    fields.forEach(function(field) {
-
-      if (field.value.trim() !== "") {
-        completed++;
-      }
-
-    });
-
-    const total = fields.length;
-
-    let percent = 0;
-
-    if (total > 0) {
-      percent = Math.round((completed / total) * 100);
-    }
-
-    document.getElementById("progressText").textContent =
-      percent + "%";
-
-    document.getElementById("progressBar").style.width =
-      percent + "%";
-  }
-
-
-  fields.forEach(function(field) {
-
-    field.addEventListener("input", updateProgress);
-    field.addEventListener("change", updateProgress);
-
+let selectedPhotos=[];
+const photoInput=$("equipmentPhotos"), photoPreview=$("photoPreview");
+photoInput.addEventListener("change",()=>{
+  selectedPhotos=Array.from(photoInput.files||[]);
+  renderPhotoPreview();
+});
+function renderPhotoPreview(){
+  photoPreview.innerHTML="";
+  $("photoCount").textContent=selectedPhotos.length
+    ? `${selectedPhotos.length} fotografía${selectedPhotos.length===1?"":"s"} seleccionada${selectedPhotos.length===1?"":"s"}.`
+    : "No hay fotografías seleccionadas.";
+  selectedPhotos.forEach((file,index)=>{
+    const reader=new FileReader();
+    reader.onload=e=>{
+      const item=document.createElement("div"); item.className="photo-item";
+      const img=document.createElement("img"); img.src=e.target.result;
+      const btn=document.createElement("button"); btn.type="button";btn.className="photo-remove";btn.textContent="×";
+      btn.onclick=()=>{selectedPhotos.splice(index,1);renderPhotoPreview()};
+      item.append(img,btn);photoPreview.appendChild(item);
+    };
+    reader.readAsDataURL(file);
   });
-
-
-  const equipmentPhotos = document.getElementById("equipmentPhotos");
-  const photoPreview = document.getElementById("photoPreview");
-  const photoCount = document.getElementById("photoCount");
-
-  let selectedPhotos = [];
-
-  function renderPhotoPreview() {
-    photoPreview.innerHTML = "";
-
-    if (selectedPhotos.length === 0) {
-      photoCount.textContent = "No hay fotografías seleccionadas.";
-      return;
-    }
-
-    photoCount.textContent =
-      selectedPhotos.length === 1
-        ? "1 fotografía seleccionada."
-        : selectedPhotos.length + " fotografías seleccionadas.";
-
-    selectedPhotos.forEach(function(photo, index) {
-      const reader = new FileReader();
-
-      reader.onload = function(event) {
-        const item = document.createElement("div");
-        item.className = "photo-preview-item";
-
-        const img = document.createElement("img");
-        img.src = event.target.result;
-        img.alt = "Fotografía " + (index + 1);
-
-        const remove = document.createElement("button");
-        remove.type = "button";
-        remove.className = "photo-remove";
-        remove.textContent = "×";
-        remove.title = "Eliminar fotografía";
-
-        remove.addEventListener("click", function() {
-          selectedPhotos.splice(index, 1);
-          renderPhotoPreview();
-        });
-
-        item.appendChild(img);
-        item.appendChild(remove);
-        photoPreview.appendChild(item);
+}
+function compressImage(file,maxSize=1400,quality=.72){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onerror=reject;
+    reader.onload=e=>{
+      const img=new Image();
+      img.onload=()=>{
+        let w=img.width,h=img.height;
+        const scale=Math.min(1,maxSize/Math.max(w,h));
+        w=Math.round(w*scale);h=Math.round(h*scale);
+        const c=document.createElement("canvas");c.width=w;c.height=h;
+        c.getContext("2d").drawImage(img,0,0,w,h);
+        resolve({name:file.name,type:"image/jpeg",data:c.toDataURL("image/jpeg",quality)});
       };
-
-      reader.readAsDataURL(photo);
-    });
-  }
-
-  equipmentPhotos.addEventListener("change", function() {
-    selectedPhotos = Array.from(this.files || []);
-    renderPhotoPreview();
+      img.onerror=reject;img.src=e.target.result;
+    };
+    reader.readAsDataURL(file);
   });
+}
 
-  function readPhotosAsDataURLs(photos) {
-    return Promise.all(
-      photos.map(function(photo) {
-        return new Promise(function(resolve, reject) {
-          const reader = new FileReader();
-
-          reader.onload = function(event) {
-            resolve({
-              name: photo.name,
-              type: photo.type,
-              data: event.target.result
-            });
-          };
-
-          reader.onerror = reject;
-          reader.readAsDataURL(photo);
-        });
-      })
-    );
+function makeSignaturePad(canvas){
+  const ctx=canvas.getContext("2d"); let drawing=false,hasInk=false;
+  function resize(){
+    const ratio=window.devicePixelRatio||1, rect=canvas.getBoundingClientRect();
+    canvas.width=rect.width*ratio;canvas.height=rect.height*ratio;ctx.setTransform(ratio,0,0,ratio,0,0);
+    ctx.lineWidth=2;ctx.lineCap="round";ctx.lineJoin="round";
   }
+  function point(e){const r=canvas.getBoundingClientRect();const p=e.touches?e.touches[0]:e;return{x:p.clientX-r.left,y:p.clientY-r.top}}
+  function start(e){e.preventDefault();drawing=true;hasInk=true;const p=point(e);ctx.beginPath();ctx.moveTo(p.x,p.y)}
+  function move(e){if(!drawing)return;e.preventDefault();const p=point(e);ctx.lineTo(p.x,p.y);ctx.stroke()}
+  function end(){drawing=false}
+  canvas.addEventListener("pointerdown",start);canvas.addEventListener("pointermove",move);canvas.addEventListener("pointerup",end);canvas.addEventListener("pointerleave",end);
+  canvas.addEventListener("touchstart",start,{passive:false});canvas.addEventListener("touchmove",move,{passive:false});canvas.addEventListener("touchend",end);
+  resize();window.addEventListener("resize",resize);
+  return {clear(){resize();hasInk=false},data(){return hasInk?canvas.toDataURL("image/png"):""}};
+}
+const techSig=makeSignaturePad($("technicianSignature"));
+const clientSig=makeSignaturePad($("clientSignature"));
+$("clearTech").onclick=techSig.clear;$("clearClient").onclick=clientSig.clear;
 
-  document.getElementById("saveOrder")
-    .addEventListener("click", async function() {
+let parts=[];
+function renderParts(){
+  const box=$("partsContainer");box.innerHTML="";
+  parts.forEach((p,i)=>{
+    const row=document.createElement("div");row.className="part-row";
+    row.innerHTML=`<input placeholder="Repuesto / material"><input type="number" min="0" step="1" placeholder="1"><input placeholder="un."><input placeholder="Observación"><button type="button" class="remove-part">×</button>`;
+    const ins=row.querySelectorAll("input");ins[0].value=p.description;ins[1].value=p.quantity;ins[2].value=p.unit;ins[3].value=p.observation;
+    ins.forEach((el,j)=>el.oninput=()=>{["description","quantity","unit","observation"].forEach((k)=>p[k]=ins[j].value)});
+    row.querySelector("button").onclick=()=>{parts.splice(i,1);renderParts();};
+    box.appendChild(row);
+  });
+}
+$("addPartButton").onclick=()=>{parts.push({description:"",quantity:"1",unit:"un.",observation:""});renderParts()};
+function getChecks(){return Array.from(document.querySelectorAll("[data-check]:checked")).map(x=>x.dataset.check)}
 
-      const orderData = {};
-
-      fields.forEach(function(field) {
-        if (field.id) {
-          orderData[field.id] = field.value;
-        }
-      });
-
-      orderData.createdAt = new Date().toISOString();
-      orderData.id = Date.now().toString();
-
-      try {
-        orderData.photos = await readPhotosAsDataURLs(selectedPhotos);
-      } catch (error) {
-        alert("No fue posible procesar las fotografías.");
-        return;
-      }
-
-      const orders = JSON.parse(
-        localStorage.getItem("aycOrdenes") || "[]"
-      );
-
-      orders.push(orderData);
-
-      localStorage.setItem(
-        "aycOrdenes",
-        JSON.stringify(orders)
-      );
-
-      localStorage.setItem(
-        "aycOrdenActual",
-        JSON.stringify(orderData)
-      );
-
-      const message = document.getElementById("savedMessage");
-      message.textContent = "✅ Orden guardada correctamente.";
-      message.style.display = "block";
-
-      setTimeout(function() {
-        message.style.display = "none";
-      }, 3500);
-
-      updateProgress();
-      renderPhotoPreview();
-
-    });
-
-  function escapeHtml(value) {
-    return String(value == null ? "" : value)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
-  }
-
-  function renderHistory() {
-
-    const historyList = document.getElementById("historyList");
-
-    if (!historyList) return;
-
-    const orders = JSON.parse(
-      localStorage.getItem("aycOrdenes") || "[]"
-    );
-
-    if (orders.length === 0) {
-      historyList.innerHTML = "<p>No hay órdenes registradas.</p>";
+async function saveOrder(){
+  const btn=$("saveOrder");btn.disabled=true;btn.textContent="⏳ GUARDANDO...";
+  try{
+    const orderData={};
+    fields.forEach(f=>{if(f.id)orderData[f.id]=f.value});
+    orderData.checklist=getChecks();
+    orderData.parts=parts.map(p=>({...p}));
+    orderData.photos=[];
+    for(const file of selectedPhotos) orderData.photos.push(await compressImage(file));
+    orderData.technicianSignature=techSig.data();
+    orderData.clientSignature=clientSig.data();
+    orderData.createdAt=new Date().toISOString();
+    orderData.id=Date.now().toString();
+    const orders=JSON.parse(localStorage.getItem("aycOrdenes")||"[]");
+    orders.push(orderData);
+    try{
+      localStorage.setItem("aycOrdenes",JSON.stringify(orders));
+      localStorage.setItem("aycOrdenActual",JSON.stringify(orderData));
+    }catch(e){
+      alert("El navegador no tiene espacio suficiente para guardar esta orden con sus fotografías. Pruebe con menos fotos.");
       return;
     }
+    $("savedMessage").style.display="block";
+    $("savedMessage").textContent="✅ Orden guardada correctamente.";
+    setTimeout(()=>$("savedMessage").style.display="none",3500);
+    renderHistory();
+  }finally{
+    btn.disabled=false;btn.textContent="💾 GUARDAR ORDEN";
+  }
+}
+$("saveOrder").addEventListener("click",saveOrder);
 
-    historyList.innerHTML = "";
+function escapeHtml(v){
+  return String(v??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
+}
+function getOrders(){try{return JSON.parse(localStorage.getItem("aycOrdenes")||"[]")}catch{return[]}}
+function findOrder(id){return getOrders().find(o=>String(o.id)===String(id))}
 
-    orders.slice().reverse().forEach(function(order) {
+function renderHistory(){
+  const list=$("historyList"),q=($("historySearch").value||"").toLowerCase().trim(),orders=getOrders();
+  const filtered=orders.slice().reverse().filter(o=>{
+    const hay=[o.id,o.client,o.engineBrand,o.engineModel,o.engineSerial,o.servicePlace,o.order].join(" ").toLowerCase();
+    return !q||hay.includes(q);
+  });
+  if(!filtered.length){list.innerHTML="<p>No hay órdenes que coincidan.</p>";return}
+  list.innerHTML="";
+  filtered.forEach(o=>{
+    const card=document.createElement("div");card.className="card";
+    const date=o.createdAt?new Date(o.createdAt).toLocaleString("es-CL"):"Sin fecha";
+    card.innerHTML=`
+      <h3>📋 Orden ${escapeHtml(o.id||"")}</h3>
+      <p><strong>Cliente:</strong> ${escapeHtml(o.client||o.clientName||o.cliente||"No informado")}</p>
+      <p><strong>Motor:</strong> ${escapeHtml(o.engineBrand||"No informado")} · ${escapeHtml(o.engineModel||"")}</p>
+      <p><strong>Ubicación:</strong> ${escapeHtml(o.servicePlace||"No informado")}</p>
+      <p><strong>Fecha:</strong> ${escapeHtml(date)}</p>
+      <p><strong>Fotos:</strong> ${Array.isArray(o.photos)?o.photos.length:0} · <strong>Checklist:</strong> ${Array.isArray(o.checklist)?o.checklist.length:0}</p>
+      <div class="history-actions">
+        <button class="small-action primary" data-view="${escapeHtml(o.id)}">📄 Ver informe</button>
+        <button class="small-action" data-delete="${escapeHtml(o.id)}">🗑️ Eliminar</button>
+      </div>`;
+    list.appendChild(card);
+  });
+  list.querySelectorAll("[data-view]").forEach(b=>b.onclick=()=>showReport(findOrder(b.dataset.view)));
+  list.querySelectorAll("[data-delete]").forEach(b=>b.onclick=()=>{
+    if(!confirm("¿Eliminar esta orden? Esta acción no se puede deshacer."))return;
+    const arr=getOrders().filter(o=>String(o.id)!==String(b.dataset.delete));
+    localStorage.setItem("aycOrdenes",JSON.stringify(arr));renderHistory();
+  });
+}
+$("historySearch").addEventListener("input",renderHistory);
 
-      const card = document.createElement("div");
-      card.className = "card";
+function renderEquipment(){
+  const box=$("equipmentList"),orders=getOrders();
+  if(!orders.length){box.innerHTML='<div class="card"><p>No hay equipos registrados todavía.</p></div>';return}
+  const map={};
+  orders.forEach(o=>{
+    const key=[o.client,o.engineSerial,o.engineModel].join("|");
+    map[key]=o;
+  });
+  box.innerHTML="";
+  Object.values(map).reverse().forEach(o=>{
+    const c=document.createElement("div");c.className="card";
+    c.innerHTML=`<h3>🏭 ${escapeHtml(o.engineBrand||"Grupo electrógeno")}</h3>
+      <p><strong>Cliente:</strong> ${escapeHtml(o.client||"No informado")}</p>
+      <p><strong>Modelo:</strong> ${escapeHtml(o.engineModel||"No informado")}</p>
+      <p><strong>Serie:</strong> ${escapeHtml(o.engineSerial||"No informado")}</p>
+      <button class="small-action primary" style="margin-top:10px;width:100%">Ver última orden</button>`;
+    c.querySelector("button").onclick=()=>showReport(o);box.appendChild(c);
+  });
+}
 
-      const fecha = order.createdAt
-        ? new Date(order.createdAt).toLocaleString("es-CL")
-        : "Sin fecha";
+function showReport(o){
+  if(!o)return;
+  $("reportContent").dataset.orderId=String(o.id||"");
+  const date=o.createdAt?new Date(o.createdAt).toLocaleString("es-CL"):"Sin fecha";
+  const checks=(o.checklist||[]).map(x=>`<li>${escapeHtml(x)}</li>`).join("")||"<li>Sin ítems registrados.</li>";
+  const partsHtml=(o.parts||[]).filter(p=>p.description).map(p=>`<tr><td>${escapeHtml(p.description)}</td><td>${escapeHtml(p.quantity)}</td><td>${escapeHtml(p.unit)}</td><td>${escapeHtml(p.observation)}</td></tr>`).join("")||'<tr><td colspan="4">Sin repuestos/materiales registrados.</td></tr>';
+  const photos=(o.photos||[]).map((p,i)=>`<div><img src="${p.data}" alt="Fotografía ${i+1}"><div style="font-size:11px;text-align:center">Fotografía ${i+1}</div></div>`).join("")||"<p>No se registraron fotografías.</p>";
+  const tech=o.technicianSignature?`<img src="${o.technicianSignature}" alt="Firma técnico">`:"<div style='height:130px;border:1px solid #d1d5db;border-radius:8px'></div>";
+  const cli=o.clientSignature?`<img src="${o.clientSignature}" alt="Firma cliente">`:"<div style='height:130px;border:1px solid #d1d5db;border-radius:8px'></div>";
 
-      const photosCount = Array.isArray(order.photos)
-        ? order.photos.length
-        : 0;
+  $("reportContent").innerHTML=`
+    <div class="report-header"><h1>AYC Energía</h1><div>INFORME DE MANTENIMIENTO</div></div>
+    <h3 class="section-title">Identificación del servicio</h3>
+    <table class="report-table">
+      <tr><td>N° de orden</td><td>${escapeHtml(o.id)}</td></tr><tr><td>Fecha</td><td>${escapeHtml(date)}</td></tr>
+      <tr><td>Orden de compra / Ref.</td><td>${escapeHtml(o.order||"No informado")}</td></tr>
+    </table>
+    <h3 class="section-title">Datos del cliente</h3>
+    <table class="report-table">
+      <tr><td>Cliente</td><td>${escapeHtml(o.client||"No informado")}</td></tr><tr><td>Contacto</td><td>${escapeHtml(o.contact||"No informado")}</td></tr>
+      <tr><td>Teléfono</td><td>${escapeHtml(o.phone||"No informado")}</td></tr><tr><td>Correo</td><td>${escapeHtml(o.email||"No informado")}</td></tr>
+      <tr><td>Dirección</td><td>${escapeHtml(o.address||"No informado")}</td></tr><tr><td>Comuna / Ciudad</td><td>${escapeHtml(o.city||"No informado")}</td></tr>
+    </table>
+    <h3 class="section-title">Grupo electrógeno</h3>
+    <table class="report-table">
+      <tr><td>Motor</td><td>${escapeHtml(o.engineBrand||"")} ${escapeHtml(o.engineModel||"")}</td></tr>
+      <tr><td>N° serie motor</td><td>${escapeHtml(o.engineSerial||"No informado")}</td></tr>
+      <tr><td>Alternador</td><td>${escapeHtml(o.alternatorBrand||"")} ${escapeHtml(o.alternatorModel||"")}</td></tr>
+      <tr><td>N° serie alternador</td><td>${escapeHtml(o.alternatorSerial||"No informado")}</td></tr>
+      <tr><td>Potencia / Voltaje / Frecuencia</td><td>${escapeHtml(o.power||"-")} kVA / ${escapeHtml(o.voltage||"-")} V / ${escapeHtml(o.frequency||"-")} Hz</td></tr>
+      <tr><td>Combustible</td><td>${escapeHtml(o.fuel||"No informado")}</td></tr>
+      <tr><td>Horómetro</td><td>${escapeHtml(o.hourStart||"-")} h → ${escapeHtml(o.hourEnd||"-")} h</td></tr>
+      <tr><td>Lugar del servicio</td><td>${escapeHtml(o.servicePlace||"No informado")}</td></tr>
+    </table>
+    <h3 class="section-title">Observaciones y trabajos</h3>
+    <p><strong>Observación inicial:</strong><br>${escapeHtml(o.initialObservation||"Sin observaciones.")}</p>
+    <p><strong>Trabajo realizado:</strong><br>${escapeHtml(o.workPerformed||"Sin descripción.")}</p>
+    <p><strong>Observación final:</strong><br>${escapeHtml(o.finalObservation||"Sin observaciones.")}</p>
+    <h3 class="section-title">Checklist de mantenimiento realizado</h3><ul>${checks}</ul>
+    <h3 class="section-title">Repuestos y materiales</h3>
+    <table class="report-table"><tr><td>Descripción</td><td>Cantidad</td><td>Unidad</td><td>Observación</td></tr>${partsHtml}</table>
+    <h3 class="section-title">Evidencia fotográfica</h3><div class="report-photos">${photos}</div>
+    <h3 class="section-title">Conformidad</h3>
+    <div class="report-signatures">
+      <div>${tech}<p style="text-align:center;font-size:12px"><strong>Firma técnico</strong></p></div>
+      <div>${cli}<p style="text-align:center;font-size:12px"><strong>Firma cliente / mandante</strong></p></div>
+    </div>
+    <p style="margin-top:25px;font-size:11px;color:#6b7280;text-align:center">Documento generado por AYC Energía · Mantenimiento de Grupos Electrógenos</p>`;
+  showScreen(screens.report);
+}
 
-      card.innerHTML = `
-        <h3>📋 Orden de Servicio</h3>
+async function generatePDF(o){
+  if(!o){alert("No se encontró la orden.");return}
+  if(!window.jspdf||!window.jspdf.jsPDF){
+    alert("No se pudo cargar el generador PDF. Use 'Imprimir / Guardar como PDF' o revise la conexión a Internet.");
+    return;
+  }
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({unit:"mm",format:"a4"});
+  const margin=15,pageW=210,pageH=297,contentW=180;
+  let y=15;
+  const dark=[17,24,39],yellow=[245,180,0],gray=[107,114,128];
 
-        <p>
-          <strong>Cliente:</strong>
-          ${escapeHtml(order.client || order.clientName || order.cliente || "No informado")}
-        </p>
-
-        <p>
-          <strong>Motor:</strong>
-          ${escapeHtml(order.engineBrand || "No informado")}
-        </p>
-
-        <p>
-          <strong>Modelo:</strong>
-          ${escapeHtml(order.engineModel || "No informado")}
-        </p>
-
-        <p>
-          <strong>Ubicación:</strong>
-          ${escapeHtml(order.servicePlace || order.lugarServicio || "No informado")}
-        </p>
-
-        <p>
-          <strong>Fecha:</strong>
-          ${escapeHtml(fecha)}
-        </p>
-
-        <p>
-          <strong>Fotografías:</strong>
-          ${photosCount}
-        </p>
-
-        <div class="history-card-actions">
-          <button class="small-action primary" data-report-id="${escapeHtml(order.id)}">
-            📄 Ver informe
-          </button>
-
-          <button class="small-action" data-print-id="${escapeHtml(order.id)}">
-            🖨️ Imprimir
-          </button>
-        </div>
-      `;
-
-      historyList.appendChild(card);
-    });
-
-    historyList.querySelectorAll("[data-report-id]").forEach(function(button) {
-      button.addEventListener("click", function() {
-        const order = findOrderById(this.dataset.reportId);
-        if (order) showReport(order);
-      });
-    });
-
-    historyList.querySelectorAll("[data-print-id]").forEach(function(button) {
-      button.addEventListener("click", function() {
-        const order = findOrderById(this.dataset.printId);
-        if (order) {
-          showReport(order);
-          setTimeout(function() {
-            window.print();
-          }, 150);
-        }
-      });
-    });
+  function header(){
+    doc.setFillColor(...dark);doc.rect(0,0,pageW,28,"F");
+    doc.setFillColor(...yellow);doc.rect(0,26,pageW,2,"F");
+    doc.setTextColor(255,255,255);doc.setFontSize(18);doc.setFont("helvetica","bold");doc.text("AYC Energía",margin,12);
+    doc.setFontSize(9);doc.setFont("helvetica","normal");doc.text("Mantenimiento de Grupos Electrógenos",margin,19);
+    doc.setTextColor(31,41,55);y=38;
+  }
+  function section(title){
+    if(y>270){doc.addPage();header()}
+    doc.setFontSize(12);doc.setFont("helvetica","bold");doc.setTextColor(...dark);doc.text(title,margin,y);y+=7;
+  }
+  function row(label,value){
+    const txt=String(value??"No informado");const lines=doc.splitTextToSize(txt,118);
+    const h=Math.max(7,lines.length*4.5+2);
+    if(y+h>285){doc.addPage();header()}
+    doc.setDrawColor(210);doc.rect(margin,y,contentW,h);
+    doc.setFontSize(8);doc.setFont("helvetica","bold");doc.text(String(label),margin+2,y+5);
+    doc.setFont("helvetica","normal");doc.text(lines,margin+64,y+5);
+    y+=h;
+  }
+  function para(label,value){
+    if(y>270){doc.addPage();header()}
+    doc.setFontSize(9);doc.setFont("helvetica","bold");doc.text(label,margin,y);y+=5;
+    doc.setFont("helvetica","normal");const lines=doc.splitTextToSize(String(value||"Sin información."),contentW);
+    lines.forEach(line=>{if(y>285){doc.addPage();header()}doc.text(line,margin,y);y+=4.5});y+=3;
   }
 
-  function findOrderById(id) {
-    const orders = JSON.parse(
-      localStorage.getItem("aycOrdenes") || "[]"
-    );
+  header();
+  doc.setFontSize(16);doc.setFont("helvetica","bold");doc.text("INFORME DE MANTENIMIENTO",margin,y);y+=8;
+  doc.setFontSize(8);doc.setTextColor(...gray);doc.text("N° Orden: "+o.id,margin,y);doc.text("Fecha: "+new Date(o.createdAt).toLocaleString("es-CL"),120,y);y+=8;
+  doc.setTextColor(31,41,55);
 
-    return orders.find(function(order) {
-      return String(order.id) === String(id);
-    });
-  }
+  section("1. DATOS DEL CLIENTE");
+  row("Cliente",o.client||"No informado");row("Contacto",o.contact||"No informado");row("Teléfono",o.phone||"No informado");row("Correo",o.email||"No informado");row("Dirección",o.address||"No informado");row("Ciudad",o.city||"No informado");row("OC / Ref.",o.order||"No informado");
+  section("2. GRUPO ELECTRÓGENO");
+  row("Motor",`${o.engineBrand||""} ${o.engineModel||""}`);row("Serie motor",o.engineSerial||"No informado");row("Alternador",`${o.alternatorBrand||""} ${o.alternatorModel||""}`);row("Serie alternador",o.alternatorSerial||"No informado");row("Potencia",`${o.power||"-"} kVA`);row("Voltaje",`${o.voltage||"-"} V`);row("Frecuencia",`${o.frequency||"-"} Hz`);row("Combustible",o.fuel||"No informado");row("Horómetro",`${o.hourStart||"-"} h → ${o.hourEnd||"-"} h`);row("Lugar",o.servicePlace||"No informado");
+  section("3. TRABAJOS Y OBSERVACIONES");
+  para("Observación inicial",o.initialObservation);para("Trabajo realizado",o.workPerformed);para("Observación final",o.finalObservation);
+  section("4. CHECKLIST");
+  const checks=o.checklist||[];para("Actividades registradas",checks.length?checks.join(", "):"No se marcaron actividades.");
+  section("5. REPUESTOS Y MATERIALES");
+  (o.parts||[]).filter(p=>p.description).forEach(p=>row(p.description,`${p.quantity||""} ${p.unit||""}${p.observation?" — "+p.observation:""}`));
+  if(!(o.parts||[]).some(p=>p.description))para("Detalle","Sin repuestos/materiales registrados.");
 
-  function showReport(order) {
-
-    const reportContent = document.getElementById("reportContent");
-
-    const fecha = order.createdAt
-      ? new Date(order.createdAt).toLocaleString("es-CL")
-      : "Sin fecha";
-
-    const photos = Array.isArray(order.photos)
-      ? order.photos
-      : [];
-
-    let photosHtml = "";
-
-    if (photos.length > 0) {
-      photosHtml = `
-        <h3 class="section-title">Evidencia fotográfica</h3>
-        <div style="
-          display:grid;
-          grid-template-columns:1fr 1fr;
-          gap:12px;
-        ">
-          ${photos.map(function(photo, index) {
-            return `
-              <div>
-                <img
-                  src="${photo.data}"
-                  alt="Fotografía ${index + 1}"
-                  style="
-                    width:100%;
-                    height:180px;
-                    object-fit:cover;
-                    border-radius:10px;
-                    border:1px solid #d1d5db;
-                  "
-                >
-                <div style="font-size:12px;color:#6b7280;margin-top:4px;">
-                  Fotografía ${index + 1}
-                </div>
-              </div>
-            `;
-          }).join("")}
-        </div>
-      `;
-    } else {
-      photosHtml = `
-        <h3 class="section-title">Evidencia fotográfica</h3>
-        <p>No se registraron fotografías.</p>
-      `;
+  const photos=o.photos||[];
+  if(photos.length){
+    section("6. EVIDENCIA FOTOGRÁFICA");
+    for(let i=0;i<photos.length;i++){
+      if(y+78>285){doc.addPage();header();section("6. EVIDENCIA FOTOGRÁFICA")}
+      try{
+        const img=photos[i].data;doc.addImage(img,"JPEG",margin,y,85,64);doc.setFontSize(8);doc.text("Fotografía "+(i+1),margin,y+69);
+        y+=76;
+      }catch(e){para("Fotografía "+(i+1),"No se pudo insertar la imagen en el PDF.")}
     }
-
-    reportContent.innerHTML = `
-      <div style="text-align:center;border-bottom:3px solid #f5b400;padding-bottom:15px;">
-        <h1 style="margin:0;">AYC Energía</h1>
-        <p style="margin:5px 0 0;">INFORME DE MANTENIMIENTO</p>
-      </div>
-
-      <h3 class="section-title">Datos del servicio</h3>
-
-      <p><strong>N° de orden:</strong> ${escapeHtml(order.id || "Sin número")}</p>
-      <p><strong>Fecha:</strong> ${escapeHtml(fecha)}</p>
-
-      <h3 class="section-title">Datos del cliente</h3>
-
-      <p><strong>Cliente:</strong> ${escapeHtml(order.client || "No informado")}</p>
-      <p><strong>Contacto:</strong> ${escapeHtml(order.contact || "No informado")}</p>
-      <p><strong>Teléfono:</strong> ${escapeHtml(order.phone || "No informado")}</p>
-      <p><strong>Correo:</strong> ${escapeHtml(order.email || "No informado")}</p>
-      <p><strong>Dirección:</strong> ${escapeHtml(order.address || "No informado")}</p>
-      <p><strong>Comuna / Ciudad:</strong> ${escapeHtml(order.city || "No informado")}</p>
-      <p><strong>OC / Referencia:</strong> ${escapeHtml(order.order || "No informado")}</p>
-
-      <h3 class="section-title">Identificación del grupo electrógeno</h3>
-
-      <p><strong>Marca del motor:</strong> ${escapeHtml(order.engineBrand || "No informado")}</p>
-      <p><strong>Modelo del motor:</strong> ${escapeHtml(order.engineModel || "No informado")}</p>
-      <p><strong>N° serie motor:</strong> ${escapeHtml(order.engineSerial || "No informado")}</p>
-      <p><strong>Marca del alternador:</strong> ${escapeHtml(order.alternatorBrand || "No informado")}</p>
-      <p><strong>Modelo del alternador:</strong> ${escapeHtml(order.alternatorModel || "No informado")}</p>
-      <p><strong>N° serie alternador:</strong> ${escapeHtml(order.alternatorSerial || "No informado")}</p>
-      <p><strong>Potencia:</strong> ${escapeHtml(order.power || "No informado")} kVA</p>
-      <p><strong>Voltaje:</strong> ${escapeHtml(order.voltage || "No informado")} V</p>
-      <p><strong>Frecuencia:</strong> ${escapeHtml(order.frequency || "No informado")} Hz</p>
-      <p><strong>Combustible:</strong> ${escapeHtml(order.fuel || "No informado")}</p>
-      <p><strong>Horómetro inicial:</strong> ${escapeHtml(order.hourStart || "No informado")} h</p>
-      <p><strong>Horómetro final:</strong> ${escapeHtml(order.hourEnd || "No informado")} h</p>
-      <p><strong>Lugar del servicio:</strong> ${escapeHtml(order.servicePlace || "No informado")}</p>
-
-      <h3 class="section-title">Observación inicial</h3>
-      <p>${escapeHtml(order.initialObservation || "Sin observaciones.")}</p>
-
-      ${photosHtml}
-
-      <div style="margin-top:30px;padding-top:15px;border-top:1px solid #d1d5db;">
-        <p style="font-size:12px;color:#6b7280;">
-          Informe generado por AYC Energía · Mantenimiento de Grupos Electrógenos
-        </p>
-      </div>
-    `;
-
-    showScreen(reportScreen);
   }
+  section("7. CONFORMIDAD Y FIRMAS");
+  if(y+70>285){doc.addPage();header();section("7. CONFORMIDAD Y FIRMAS")}
+  if(o.technicianSignature)doc.addImage(o.technicianSignature,"PNG",margin,y,80,50);
+  if(o.clientSignature)doc.addImage(o.clientSignature,"PNG",110,y,80,50);
+  doc.setFontSize(8);doc.text("Firma técnico",margin,y+55);doc.text("Firma cliente / mandante",110,y+55);y+=65;
+  doc.setFontSize(7);doc.setTextColor(...gray);doc.text("AYC Energía SpA · Informe generado electrónicamente",margin,289);
 
-  document.getElementById("backReport")
-    .addEventListener("click", function() {
-      showScreen(historyScreen);
-      renderHistory();
-    });
+  const safeClient=(o.client||"Cliente").replace(/[^\wáéíóúñÁÉÍÓÚÑ -]/g,"").trim().replace(/\s+/g,"_").slice(0,40)||"Cliente";
+  doc.save(`Informe_Mantenimiento_${safeClient}_${o.id}.pdf`);
+}
 
-  document.getElementById("downloadReportButton")
-    .addEventListener("click", function() {
-      window.print();
-    });
+$("downloadReportButton").onclick=()=>{
+  const id=$("reportContent").dataset.orderId;
+  const o=findOrder(id);
+  generatePDF(o);
+};
+$("printReportButton").onclick=()=>window.print();
 
-  document.getElementById("printReportButton")
-    .addEventListener("click", function() {
-      window.print();
-    });
 
+function resetOrderForm(){
+  fields.forEach(f=>f.value="");
+  document.querySelectorAll("#orderScreen input[type=checkbox]").forEach(c=>c.checked=false);
+  selectedPhotos=[];photoInput.value="";renderPhotoPreview();
+  parts=[];renderParts();
+  techSig.clear();clientSig.clear();
+  $("savedMessage").style.display="none";
+}
+renderParts();updateProgress();
 </script>
-
 </body>
 </html>
