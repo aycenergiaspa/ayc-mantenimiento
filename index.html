@@ -492,13 +492,32 @@
 
       <h3 class="section-title">Evidencia inicial</h3>
 
-      <div class="photo-box">
-        <strong>📷 Fotografías del equipo</strong>
-        <span>
-          En la siguiente versión incorporaremos la captura
-          y asociación automática de fotografías.
-        </span>
-      </div>
+     <div class="photo-box">
+  <strong>📷 Fotografías del equipo</strong>
+
+  <span>
+    Agregue fotografías del estado del equipo, trabajos realizados
+    o cualquier evidencia del mantenimiento.
+  </span>
+
+  <input
+    type="file"
+    id="equipmentPhotos"
+    accept="image/*"
+    multiple
+    style="margin-top:15px;"
+  >
+
+  <div
+    id="photoPreview"
+    style="
+      display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
+      gap:12px;
+      margin-top:15px;
+    "
+  ></div>
+</div>
 
       <h3 class="section-title">Observación inicial</h3>
 
