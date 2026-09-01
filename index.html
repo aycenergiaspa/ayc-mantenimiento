@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#f5b400">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="AYC Energía">
 <title>AYC Energía - Órdenes de Mantenimiento</title>
 
 <!-- Librería PDF. Si el navegador tiene Internet, el informe se genera directamente como PDF. -->
@@ -54,6 +59,7 @@ input:focus,select:focus,textarea:focus{border-color:#f5b400;box-shadow:0 0 0 2p
 .report-photos{display:grid;grid-template-columns:1fr 1fr;gap:10px}.report-photos img{width:100%;height:180px;object-fit:cover;border-radius:8px;border:1px solid #d1d5db}
 .report-signatures{display:grid;grid-template-columns:1fr 1fr;gap:15px}.report-signatures img{width:100%;height:130px;object-fit:contain;border:1px solid #d1d5db;border-radius:8px}
 .footer{text-align:center;color:#9ca3af;font-size:12px;padding:30px 20px}
+.home-feature{font:inherit;color:inherit;display:block}.home-feature:active{transform:scale(.995)}
 @media(max-width:600px){.row,.check-grid,.parts-head,.part-row{grid-template-columns:1fr}.photo-preview,.report-photos,.report-signatures{grid-template-columns:1fr}}
 @media print{
  body{background:#fff;padding:0!important}.app{max-width:none;box-shadow:none}
@@ -82,9 +88,9 @@ input:focus,select:focus,textarea:focus{border-color:#f5b400;box-shadow:0 0 0 2p
     <button class="secondary-button" id="equipmentButton"><span class="icon">🏭</span>Equipos</button>
     <button class="secondary-button" id="historyButton"><span class="icon">📋</span>Historial</button>
   </div>
-  <div class="card" style="margin-top:20px"><h3>📸 Evidencia fotográfica</h3><p>Registra fotografías del estado inicial, trabajos realizados y estado final.</p></div>
-  <div class="card"><h3>✍️ Firma del mandante</h3><p>La orden puede incluir firma del técnico y del cliente directamente desde el dispositivo.</p></div>
-  <div class="card"><h3>📄 Informe automático</h3><p>La orden completa puede convertirse en un informe PDF para entregar al cliente.</p></div>
+  <button class="card home-feature" id="homePhotos" type="button" style="margin-top:20px;text-align:left;width:100%;cursor:pointer"><h3>📸 Evidencia fotográfica</h3><p>Registra fotografías del estado inicial, trabajos realizados y estado final.</p></button>
+  <button class="card home-feature" id="homeSignature" type="button" style="text-align:left;width:100%;cursor:pointer"><h3>✍️ Firma del mandante</h3><p>La orden puede incluir firma del técnico y del cliente directamente desde el dispositivo.</p></button>
+  <button class="card home-feature" id="homeReport" type="button" style="text-align:left;width:100%;cursor:pointer"><h3>📄 Informe automático</h3><p>Abre el historial para revisar una orden y generar su informe PDF.</p></button>
 </section>
 
 <section id="orderScreen" class="screen">
@@ -207,6 +213,12 @@ const fields = document.querySelectorAll("#orderScreen input:not([type=file]):no
 function showScreen(screen){
   Object.values(screens).forEach(s=>s.classList.remove("active"));
   screen.classList.add("active");
+  if(screen===screens.order){
+    requestAnimationFrame(()=>{
+      techSig?.resize();
+      clientSig?.resize();
+    });
+  }
   window.scrollTo({top:0,behavior:"smooth"});
 }
 
@@ -217,6 +229,9 @@ $("newOrderButton").addEventListener("click",()=>{
 });
 $("equipmentButton").addEventListener("click",()=>{renderEquipment();showScreen(screens.equipment)});
 $("historyButton").addEventListener("click",()=>{renderHistory();showScreen(screens.history)});
+$("homePhotos").addEventListener("click",()=>{resetOrderForm();showScreen(screens.order);requestAnimationFrame(()=>document.getElementById("equipmentPhotos").scrollIntoView({behavior:"smooth",block:"center"}))});
+$("homeSignature").addEventListener("click",()=>{resetOrderForm();showScreen(screens.order);requestAnimationFrame(()=>document.getElementById("technicianSignature").scrollIntoView({behavior:"smooth",block:"center"}))});
+$("homeReport").addEventListener("click",()=>{renderHistory();showScreen(screens.history)});
 $("backHome").addEventListener("click",()=>showScreen(screens.home));
 $("backEquipment").addEventListener("click",()=>showScreen(screens.home));
 $("backHistory").addEventListener("click",()=>showScreen(screens.home));
@@ -277,20 +292,76 @@ function compressImage(file,maxSize=1400,quality=.72){
 }
 
 function makeSignaturePad(canvas){
-  const ctx=canvas.getContext("2d"); let drawing=false,hasInk=false;
+  const ctx=canvas.getContext("2d");
+  let drawing=false,hasInk=false;
+
   function resize(){
-    const ratio=window.devicePixelRatio||1, rect=canvas.getBoundingClientRect();
-    canvas.width=rect.width*ratio;canvas.height=rect.height*ratio;ctx.setTransform(ratio,0,0,ratio,0,0);
-    ctx.lineWidth=2;ctx.lineCap="round";ctx.lineJoin="round";
+    const rect=canvas.getBoundingClientRect();
+    if(rect.width<=0 || rect.height<=0) return;
+    const ratio=window.devicePixelRatio||1;
+    const oldData=hasInk && canvas.width>0 ? canvas.toDataURL("image/png") : "";
+    canvas.width=Math.round(rect.width*ratio);
+    canvas.height=Math.round(rect.height*ratio);
+    canvas.style.touchAction="none";
+    ctx.setTransform(ratio,0,0,ratio,0,0);
+    ctx.lineWidth=2;
+    ctx.lineCap="round";
+    ctx.lineJoin="round";
+    if(oldData){
+      const img=new Image();
+      img.onload=()=>ctx.drawImage(img,0,0,rect.width,rect.height);
+      img.src=oldData;
+    }
   }
-  function point(e){const r=canvas.getBoundingClientRect();const p=e.touches?e.touches[0]:e;return{x:p.clientX-r.left,y:p.clientY-r.top}}
-  function start(e){e.preventDefault();drawing=true;hasInk=true;const p=point(e);ctx.beginPath();ctx.moveTo(p.x,p.y)}
-  function move(e){if(!drawing)return;e.preventDefault();const p=point(e);ctx.lineTo(p.x,p.y);ctx.stroke()}
-  function end(){drawing=false}
-  canvas.addEventListener("pointerdown",start);canvas.addEventListener("pointermove",move);canvas.addEventListener("pointerup",end);canvas.addEventListener("pointerleave",end);
-  canvas.addEventListener("touchstart",start,{passive:false});canvas.addEventListener("touchmove",move,{passive:false});canvas.addEventListener("touchend",end);
-  resize();window.addEventListener("resize",resize);
-  return {clear(){resize();hasInk=false},data(){return hasInk?canvas.toDataURL("image/png"):""}};
+
+  function point(e){
+    const r=canvas.getBoundingClientRect();
+    return {x:e.clientX-r.left,y:e.clientY-r.top};
+  }
+
+  function start(e){
+    e.preventDefault();
+    drawing=true;
+    hasInk=true;
+    canvas.setPointerCapture?.(e.pointerId);
+    const p=point(e);
+    ctx.beginPath();
+    ctx.moveTo(p.x,p.y);
+  }
+
+  function move(e){
+    if(!drawing)return;
+    e.preventDefault();
+    const p=point(e);
+    ctx.lineTo(p.x,p.y);
+    ctx.stroke();
+  }
+
+  function end(e){
+    drawing=false;
+    try{canvas.releasePointerCapture?.(e.pointerId)}catch(_){}
+  }
+
+  canvas.addEventListener("pointerdown",start);
+  canvas.addEventListener("pointermove",move);
+  canvas.addEventListener("pointerup",end);
+  canvas.addEventListener("pointercancel",end);
+  canvas.addEventListener("pointerleave",end);
+
+  resize();
+  return {
+    resize,
+    clear(){
+      const rect=canvas.getBoundingClientRect();
+      const ratio=window.devicePixelRatio||1;
+      canvas.width=Math.max(1,Math.round(rect.width*ratio));
+      canvas.height=Math.max(1,Math.round(rect.height*ratio));
+      ctx.setTransform(ratio,0,0,ratio,0,0);
+      ctx.lineWidth=2;ctx.lineCap="round";ctx.lineJoin="round";
+      hasInk=false;
+    },
+    data(){return hasInk?canvas.toDataURL("image/png"):""}
+  };
 }
 const techSig=makeSignaturePad($("technicianSignature"));
 const clientSig=makeSignaturePad($("clientSignature"));
@@ -548,6 +619,10 @@ function resetOrderForm(){
   $("savedMessage").style.display="none";
 }
 renderParts();updateProgress();
+
+if("serviceWorker" in navigator){
+  window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js").catch(()=>{}));
+}
 </script>
 </body>
 </html>
