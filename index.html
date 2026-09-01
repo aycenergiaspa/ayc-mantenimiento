@@ -268,6 +268,88 @@
       font-size: 13px;
     }
 
+
+    .photo-preview-item {
+      position: relative;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 6px;
+    }
+
+    .photo-preview-item img {
+      display: block;
+      width: 100%;
+      height: 140px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    .photo-remove {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 30px;
+      height: 30px;
+      border: 0;
+      border-radius: 50%;
+      background: #dc2626;
+      color: white;
+      font-size: 20px;
+      line-height: 30px;
+      cursor: pointer;
+    }
+
+    .history-card-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .small-action {
+      border: 1px solid #d1d5db;
+      background: white;
+      color: #111827;
+      border-radius: 10px;
+      padding: 11px 8px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .small-action.primary {
+      background: #111827;
+      color: white;
+      border-color: #111827;
+    }
+
+    .report-preview {
+      display: none;
+    }
+
+    @media print {
+      body {
+        background: white;
+        padding: 0 !important;
+      }
+
+      .app {
+        max-width: none;
+        box-shadow: none;
+        border-radius: 0;
+      }
+
+      .header,
+      .footer,
+      .screen:not(#reportScreen) {
+        display: none !important;
+      }
+
+      #reportScreen {
+        display: block !important;
+      }
+    }
+
     .footer {
       text-align: center;
       color: #9ca3af;
@@ -492,32 +574,35 @@
 
       <h3 class="section-title">Evidencia inicial</h3>
 
-     <div class="photo-box">
-  <strong>📷 Fotografías del equipo</strong>
+      <div class="photo-box">
+        <strong>📷 Fotografías del equipo</strong>
+        <span>
+          Agregue fotografías del estado del equipo, trabajos realizados
+          o cualquier evidencia del mantenimiento.
+        </span>
 
-  <span>
-    Agregue fotografías del estado del equipo, trabajos realizados
-    o cualquier evidencia del mantenimiento.
-  </span>
+        <input
+          type="file"
+          id="equipmentPhotos"
+          accept="image/*"
+          multiple
+          style="margin-top:15px;"
+        >
 
-  <input
-    type="file"
-    id="equipmentPhotos"
-    accept="image/*"
-    multiple
-    style="margin-top:15px;"
-  >
+        <div id="photoCount" style="margin-top:10px;font-size:13px;color:#6b7280;">
+          No hay fotografías seleccionadas.
+        </div>
 
-  <div
-    id="photoPreview"
-    style="
-      display:grid;
-      grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
-      gap:12px;
-      margin-top:15px;
-    "
-  ></div>
-</div>
+        <div
+          id="photoPreview"
+          style="
+            display:grid;
+            grid-template-columns:repeat(2, minmax(0,1fr));
+            gap:12px;
+            margin-top:15px;
+          "
+        ></div>
+      </div>
 
       <h3 class="section-title">Observación inicial</h3>
 
@@ -590,6 +675,22 @@
     </div>
 </div>
 
+
+    <!-- INFORME -->
+    <section id="reportScreen" class="screen">
+      <button class="back" id="backReport">← Volver</button>
+
+      <div id="reportContent" class="card"></div>
+
+      <button class="save-button" id="downloadReportButton">
+        📄 DESCARGAR INFORME PDF
+      </button>
+
+      <button class="small-action" id="printReportButton" style="width:100%;margin-top:10px;">
+        🖨️ IMPRIMIR / GUARDAR COMO PDF
+      </button>
+    </section>
+
   </main>
 
   <div class="footer">
@@ -605,12 +706,14 @@
   const orderScreen = document.getElementById("orderScreen");
   const equipmentScreen = document.getElementById("equipmentScreen");
   const historyScreen = document.getElementById("historyScreen");
+  const reportScreen = document.getElementById("reportScreen");
 
   function showScreen(screen) {
     homeScreen.classList.remove("active");
     orderScreen.classList.remove("active");
     equipmentScreen.classList.remove("active");
     historyScreen.classList.remove("active");
+    reportScreen.classList.remove("active");
 
     screen.classList.add("active");
 
@@ -693,34 +796,121 @@
   });
 
 
+  const equipmentPhotos = document.getElementById("equipmentPhotos");
+  const photoPreview = document.getElementById("photoPreview");
+  const photoCount = document.getElementById("photoCount");
+
+  let selectedPhotos = [];
+
+  function renderPhotoPreview() {
+    photoPreview.innerHTML = "";
+
+    if (selectedPhotos.length === 0) {
+      photoCount.textContent = "No hay fotografías seleccionadas.";
+      return;
+    }
+
+    photoCount.textContent =
+      selectedPhotos.length === 1
+        ? "1 fotografía seleccionada."
+        : selectedPhotos.length + " fotografías seleccionadas.";
+
+    selectedPhotos.forEach(function(photo, index) {
+      const reader = new FileReader();
+
+      reader.onload = function(event) {
+        const item = document.createElement("div");
+        item.className = "photo-preview-item";
+
+        const img = document.createElement("img");
+        img.src = event.target.result;
+        img.alt = "Fotografía " + (index + 1);
+
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.className = "photo-remove";
+        remove.textContent = "×";
+        remove.title = "Eliminar fotografía";
+
+        remove.addEventListener("click", function() {
+          selectedPhotos.splice(index, 1);
+          renderPhotoPreview();
+        });
+
+        item.appendChild(img);
+        item.appendChild(remove);
+        photoPreview.appendChild(item);
+      };
+
+      reader.readAsDataURL(photo);
+    });
+  }
+
+  equipmentPhotos.addEventListener("change", function() {
+    selectedPhotos = Array.from(this.files || []);
+    renderPhotoPreview();
+  });
+
+  function readPhotosAsDataURLs(photos) {
+    return Promise.all(
+      photos.map(function(photo) {
+        return new Promise(function(resolve, reject) {
+          const reader = new FileReader();
+
+          reader.onload = function(event) {
+            resolve({
+              name: photo.name,
+              type: photo.type,
+              data: event.target.result
+            });
+          };
+
+          reader.onerror = reject;
+          reader.readAsDataURL(photo);
+        });
+      })
+    );
+  }
+
   document.getElementById("saveOrder")
-    .addEventListener("click", function() {
+    .addEventListener("click", async function() {
 
       const orderData = {};
 
       fields.forEach(function(field) {
-
         if (field.id) {
           orderData[field.id] = field.value;
         }
-
       });
 
       orderData.createdAt = new Date().toISOString();
+      orderData.id = Date.now().toString();
 
-     const orders = JSON.parse(localStorage.getItem("aycOrdenes") || "[]");
+      try {
+        orderData.photos = await readPhotosAsDataURLs(selectedPhotos);
+      } catch (error) {
+        alert("No fue posible procesar las fotografías.");
+        return;
+      }
 
-orderData.id = Date.now().toString();
+      const orders = JSON.parse(
+        localStorage.getItem("aycOrdenes") || "[]"
+      );
 
-orders.push(orderData);
+      orders.push(orderData);
 
-localStorage.setItem("aycOrdenes", JSON.stringify(orders));
+      localStorage.setItem(
+        "aycOrdenes",
+        JSON.stringify(orders)
+      );
 
-localStorage.setItem("aycOrdenActual", JSON.stringify(orderData));
+      localStorage.setItem(
+        "aycOrdenActual",
+        JSON.stringify(orderData)
+      );
 
-      const message =
-        document.getElementById("savedMessage");
-
+      const message = document.getElementById("savedMessage");
+      message.textContent = "✅ Orden guardada correctamente.";
       message.style.display = "block";
 
       setTimeout(function() {
@@ -728,210 +918,245 @@ localStorage.setItem("aycOrdenActual", JSON.stringify(orderData));
       }, 3500);
 
       updateProgress();
+      renderPhotoPreview();
 
     });
-function renderHistory() {
+
+  function escapeHtml(value) {
+    return String(value == null ? "" : value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  function renderHistory() {
 
     const historyList = document.getElementById("historyList");
 
     if (!historyList) return;
 
     const orders = JSON.parse(
-        localStorage.getItem("aycOrdenes") || "[]"
+      localStorage.getItem("aycOrdenes") || "[]"
     );
 
     if (orders.length === 0) {
-        historyList.innerHTML =
-            "<p>No hay órdenes registradas.</p>";
-        return;
+      historyList.innerHTML = "<p>No hay órdenes registradas.</p>";
+      return;
     }
 
     historyList.innerHTML = "";
 
     orders.slice().reverse().forEach(function(order) {
 
-        const card = document.createElement("div");
+      const card = document.createElement("div");
+      card.className = "card";
 
-        card.className = "card";
+      const fecha = order.createdAt
+        ? new Date(order.createdAt).toLocaleString("es-CL")
+        : "Sin fecha";
 
-        const fecha = order.createdAt
-            ? new Date(order.createdAt).toLocaleString("es-CL")
-            : "Sin fecha";
+      const photosCount = Array.isArray(order.photos)
+        ? order.photos.length
+        : 0;
 
-        card.innerHTML = `
-            <h3>📋 Orden de Servicio</h3>
+      card.innerHTML = `
+        <h3>📋 Orden de Servicio</h3>
 
-            <p>
-                <strong>Cliente:</strong>
-               ${order.client || order.clientName || order.cliente || "No informado"}
-            </p>
+        <p>
+          <strong>Cliente:</strong>
+          ${escapeHtml(order.client || order.clientName || order.cliente || "No informado")}
+        </p>
 
-            <p>
-                <strong>Motor:</strong>
-               ${order.engineBrand || "No informado"}
-            </p>
+        <p>
+          <strong>Motor:</strong>
+          ${escapeHtml(order.engineBrand || "No informado")}
+        </p>
 
-            <p>
-                <strong>Modelo:</strong>
-               ${order.engineModel || "No informado"}
-            </p>
+        <p>
+          <strong>Modelo:</strong>
+          ${escapeHtml(order.engineModel || "No informado")}
+        </p>
 
-            <p>
-                <strong>Ubicación:</strong>
-                ${order.servicePlace || order.lugarServicio || "No informado"}
-            </p>
+        <p>
+          <strong>Ubicación:</strong>
+          ${escapeHtml(order.servicePlace || order.lugarServicio || "No informado")}
+        </p>
 
-            <p>
-                <strong>Fecha:</strong>
-                ${fecha}
-            </p>
-        `;
+        <p>
+          <strong>Fecha:</strong>
+          ${escapeHtml(fecha)}
+        </p>
 
-        historyList.appendChild(card);
+        <p>
+          <strong>Fotografías:</strong>
+          ${photosCount}
+        </p>
+
+        <div class="history-card-actions">
+          <button class="small-action primary" data-report-id="${escapeHtml(order.id)}">
+            📄 Ver informe
+          </button>
+
+          <button class="small-action" data-print-id="${escapeHtml(order.id)}">
+            🖨️ Imprimir
+          </button>
+        </div>
+      `;
+
+      historyList.appendChild(card);
     });
-}
-  // ===============================
-// FOTOGRAFÍAS DEL EQUIPO
-// ===============================
 
-const equipmentPhotos = document.getElementById("equipmentPhotos");
-const photoPreview = document.getElementById("photoPreview");
-
-let selectedPhotos = [];
-
-equipmentPhotos.addEventListener("change", function () {
-
-  selectedPhotos = Array.from(this.files);
-
-  photoPreview.innerHTML = "";
-
-  selectedPhotos.forEach(function (file, index) {
-
-    const reader = new FileReader();
-
-    reader.onload = function (event) {
-
-      const photoContainer = document.createElement("div");
-
-      photoContainer.style.position = "relative";
-
-      photoContainer.innerHTML = `
-        <img
-          src="${event.target.result}"
-          style="
-            width:100%;
-            height:120px;
-            object-fit:cover;
-            border-radius:10px;
-            border:1px solid #d1d5db;
-          "
-        >
-
-        <button
-          type="button"
-          data-index="${index}"
-          style="
-            position:absolute;
-            top:5px;
-            right:5px;
-            border:none;
-            border-radius:50%;
-            width:28px;
-            height:28px;
-            background:#dc2626;
-            color:white;
-            cursor:pointer;
-            font-weight:bold;
-          "
-        >
-          ×
-        </button>
-      `;
-
-      photoPreview.appendChild(photoContainer);
-
-      photoContainer.querySelector("button").addEventListener("click", function () {
-
-        const removeIndex = Number(this.dataset.index);
-
-        selectedPhotos.splice(removeIndex, 1);
-
-        renderPhotoPreview();
-
+    historyList.querySelectorAll("[data-report-id]").forEach(function(button) {
+      button.addEventListener("click", function() {
+        const order = findOrderById(this.dataset.reportId);
+        if (order) showReport(order);
       });
+    });
 
-    };
-
-    reader.readAsDataURL(file);
-
-  });
-
-});
-
-
-function renderPhotoPreview() {
-
-  photoPreview.innerHTML = "";
-
-  selectedPhotos.forEach(function (file, index) {
-
-    const reader = new FileReader();
-
-    reader.onload = function (event) {
-
-      const photoContainer = document.createElement("div");
-
-      photoContainer.style.position = "relative";
-
-      photoContainer.innerHTML = `
-        <img
-          src="${event.target.result}"
-          style="
-            width:100%;
-            height:120px;
-            object-fit:cover;
-            border-radius:10px;
-            border:1px solid #d1d5db;
-          "
-        >
-
-        <button
-          type="button"
-          style="
-            position:absolute;
-            top:5px;
-            right:5px;
-            border:none;
-            border-radius:50%;
-            width:28px;
-            height:28px;
-            background:#dc2626;
-            color:white;
-            cursor:pointer;
-            font-weight:bold;
-          "
-        >
-          ×
-        </button>
-      `;
-
-      photoPreview.appendChild(photoContainer);
-
-      photoContainer.querySelector("button").addEventListener("click", function () {
-
-        selectedPhotos.splice(index, 1);
-
-        renderPhotoPreview();
-
+    historyList.querySelectorAll("[data-print-id]").forEach(function(button) {
+      button.addEventListener("click", function() {
+        const order = findOrderById(this.dataset.printId);
+        if (order) {
+          showReport(order);
+          setTimeout(function() {
+            window.print();
+          }, 150);
+        }
       });
+    });
+  }
 
-    };
+  function findOrderById(id) {
+    const orders = JSON.parse(
+      localStorage.getItem("aycOrdenes") || "[]"
+    );
 
-    reader.readAsDataURL(file);
+    return orders.find(function(order) {
+      return String(order.id) === String(id);
+    });
+  }
 
-  });
+  function showReport(order) {
 
-}
+    const reportContent = document.getElementById("reportContent");
+
+    const fecha = order.createdAt
+      ? new Date(order.createdAt).toLocaleString("es-CL")
+      : "Sin fecha";
+
+    const photos = Array.isArray(order.photos)
+      ? order.photos
+      : [];
+
+    let photosHtml = "";
+
+    if (photos.length > 0) {
+      photosHtml = `
+        <h3 class="section-title">Evidencia fotográfica</h3>
+        <div style="
+          display:grid;
+          grid-template-columns:1fr 1fr;
+          gap:12px;
+        ">
+          ${photos.map(function(photo, index) {
+            return `
+              <div>
+                <img
+                  src="${photo.data}"
+                  alt="Fotografía ${index + 1}"
+                  style="
+                    width:100%;
+                    height:180px;
+                    object-fit:cover;
+                    border-radius:10px;
+                    border:1px solid #d1d5db;
+                  "
+                >
+                <div style="font-size:12px;color:#6b7280;margin-top:4px;">
+                  Fotografía ${index + 1}
+                </div>
+              </div>
+            `;
+          }).join("")}
+        </div>
+      `;
+    } else {
+      photosHtml = `
+        <h3 class="section-title">Evidencia fotográfica</h3>
+        <p>No se registraron fotografías.</p>
+      `;
+    }
+
+    reportContent.innerHTML = `
+      <div style="text-align:center;border-bottom:3px solid #f5b400;padding-bottom:15px;">
+        <h1 style="margin:0;">AYC Energía</h1>
+        <p style="margin:5px 0 0;">INFORME DE MANTENIMIENTO</p>
+      </div>
+
+      <h3 class="section-title">Datos del servicio</h3>
+
+      <p><strong>N° de orden:</strong> ${escapeHtml(order.id || "Sin número")}</p>
+      <p><strong>Fecha:</strong> ${escapeHtml(fecha)}</p>
+
+      <h3 class="section-title">Datos del cliente</h3>
+
+      <p><strong>Cliente:</strong> ${escapeHtml(order.client || "No informado")}</p>
+      <p><strong>Contacto:</strong> ${escapeHtml(order.contact || "No informado")}</p>
+      <p><strong>Teléfono:</strong> ${escapeHtml(order.phone || "No informado")}</p>
+      <p><strong>Correo:</strong> ${escapeHtml(order.email || "No informado")}</p>
+      <p><strong>Dirección:</strong> ${escapeHtml(order.address || "No informado")}</p>
+      <p><strong>Comuna / Ciudad:</strong> ${escapeHtml(order.city || "No informado")}</p>
+      <p><strong>OC / Referencia:</strong> ${escapeHtml(order.order || "No informado")}</p>
+
+      <h3 class="section-title">Identificación del grupo electrógeno</h3>
+
+      <p><strong>Marca del motor:</strong> ${escapeHtml(order.engineBrand || "No informado")}</p>
+      <p><strong>Modelo del motor:</strong> ${escapeHtml(order.engineModel || "No informado")}</p>
+      <p><strong>N° serie motor:</strong> ${escapeHtml(order.engineSerial || "No informado")}</p>
+      <p><strong>Marca del alternador:</strong> ${escapeHtml(order.alternatorBrand || "No informado")}</p>
+      <p><strong>Modelo del alternador:</strong> ${escapeHtml(order.alternatorModel || "No informado")}</p>
+      <p><strong>N° serie alternador:</strong> ${escapeHtml(order.alternatorSerial || "No informado")}</p>
+      <p><strong>Potencia:</strong> ${escapeHtml(order.power || "No informado")} kVA</p>
+      <p><strong>Voltaje:</strong> ${escapeHtml(order.voltage || "No informado")} V</p>
+      <p><strong>Frecuencia:</strong> ${escapeHtml(order.frequency || "No informado")} Hz</p>
+      <p><strong>Combustible:</strong> ${escapeHtml(order.fuel || "No informado")}</p>
+      <p><strong>Horómetro inicial:</strong> ${escapeHtml(order.hourStart || "No informado")} h</p>
+      <p><strong>Horómetro final:</strong> ${escapeHtml(order.hourEnd || "No informado")} h</p>
+      <p><strong>Lugar del servicio:</strong> ${escapeHtml(order.servicePlace || "No informado")}</p>
+
+      <h3 class="section-title">Observación inicial</h3>
+      <p>${escapeHtml(order.initialObservation || "Sin observaciones.")}</p>
+
+      ${photosHtml}
+
+      <div style="margin-top:30px;padding-top:15px;border-top:1px solid #d1d5db;">
+        <p style="font-size:12px;color:#6b7280;">
+          Informe generado por AYC Energía · Mantenimiento de Grupos Electrógenos
+        </p>
+      </div>
+    `;
+
+    showScreen(reportScreen);
+  }
+
+  document.getElementById("backReport")
+    .addEventListener("click", function() {
+      showScreen(historyScreen);
+      renderHistory();
+    });
+
+  document.getElementById("downloadReportButton")
+    .addEventListener("click", function() {
+      window.print();
+    });
+
+  document.getElementById("printReportButton")
+    .addEventListener("click", function() {
+      window.print();
+    });
+
 </script>
 
 </body>
