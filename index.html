@@ -790,6 +790,148 @@ function renderHistory() {
         historyList.appendChild(card);
     });
 }
+  // ===============================
+// FOTOGRAFÍAS DEL EQUIPO
+// ===============================
+
+const equipmentPhotos = document.getElementById("equipmentPhotos");
+const photoPreview = document.getElementById("photoPreview");
+
+let selectedPhotos = [];
+
+equipmentPhotos.addEventListener("change", function () {
+
+  selectedPhotos = Array.from(this.files);
+
+  photoPreview.innerHTML = "";
+
+  selectedPhotos.forEach(function (file, index) {
+
+    const reader = new FileReader();
+
+    reader.onload = function (event) {
+
+      const photoContainer = document.createElement("div");
+
+      photoContainer.style.position = "relative";
+
+      photoContainer.innerHTML = `
+        <img
+          src="${event.target.result}"
+          style="
+            width:100%;
+            height:120px;
+            object-fit:cover;
+            border-radius:10px;
+            border:1px solid #d1d5db;
+          "
+        >
+
+        <button
+          type="button"
+          data-index="${index}"
+          style="
+            position:absolute;
+            top:5px;
+            right:5px;
+            border:none;
+            border-radius:50%;
+            width:28px;
+            height:28px;
+            background:#dc2626;
+            color:white;
+            cursor:pointer;
+            font-weight:bold;
+          "
+        >
+          ×
+        </button>
+      `;
+
+      photoPreview.appendChild(photoContainer);
+
+      photoContainer.querySelector("button").addEventListener("click", function () {
+
+        const removeIndex = Number(this.dataset.index);
+
+        selectedPhotos.splice(removeIndex, 1);
+
+        renderPhotoPreview();
+
+      });
+
+    };
+
+    reader.readAsDataURL(file);
+
+  });
+
+});
+
+
+function renderPhotoPreview() {
+
+  photoPreview.innerHTML = "";
+
+  selectedPhotos.forEach(function (file, index) {
+
+    const reader = new FileReader();
+
+    reader.onload = function (event) {
+
+      const photoContainer = document.createElement("div");
+
+      photoContainer.style.position = "relative";
+
+      photoContainer.innerHTML = `
+        <img
+          src="${event.target.result}"
+          style="
+            width:100%;
+            height:120px;
+            object-fit:cover;
+            border-radius:10px;
+            border:1px solid #d1d5db;
+          "
+        >
+
+        <button
+          type="button"
+          style="
+            position:absolute;
+            top:5px;
+            right:5px;
+            border:none;
+            border-radius:50%;
+            width:28px;
+            height:28px;
+            background:#dc2626;
+            color:white;
+            cursor:pointer;
+            font-weight:bold;
+          "
+        >
+          ×
+        </button>
+      `;
+
+      photoPreview.appendChild(photoContainer);
+
+      photoContainer.querySelector("button").addEventListener("click", function () {
+
+        selectedPhotos.splice(index, 1);
+
+        renderPhotoPreview();
+
+      });
+
+    };
+
+    reader.readAsDataURL(file);
+
+  });
+
+}
 </script>
 
 </body>
